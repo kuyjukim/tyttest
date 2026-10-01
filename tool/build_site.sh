@@ -81,7 +81,6 @@ python3 - "$SITE" "$STORE" <<'PYTHON'
 import base64, pathlib, subprocess, sys, tempfile
 
 site, store = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-page = (site / 'index.html').read_text()
 
 def data_uri(path):
     return 'data:image/png;base64,' + base64.b64encode(path.read_bytes()).decode()
@@ -94,14 +93,32 @@ with tempfile.TemporaryDirectory() as tmp:
                         str(small), '2'], check=True, stdout=subprocess.DEVNULL)
         swaps[f'shots/{name}.png'] = data_uri(small)
 
-for ref, uri in swaps.items():
-    before = page
-    page = page.replace(f'"{ref}"', f'"{uri}"')
-    assert page != before, f'nothing referenced {ref}'
+def inline(text):
+    for ref, uri in swaps.items():
+        before = text
+        text = text.replace(f'"{ref}"', f'"{uri}"')
+        assert text != before, f'nothing referenced {ref}'
+    return text
 
-out = site / 'grove.html'
-out.write_text(page)
-print(f'wrote {out} ({out.stat().st_size // 1024} KB, self-contained)')
+# Two self-contained builds of the same page, differing only in whether they
+# carry a document around the content.
+#
+# grove.html is for a web server, a mail attachment or a USB stick: a whole
+# document, opened by double-clicking it.
+#
+# artifact.html is the body alone, because the artifact host wraps what it is
+# given in its own doctype and head. Handing it a complete document nests one
+# inside the other. It exists at all - rather than the host just serving the
+# published image files - because a relative src has to resolve against
+# whatever base URL the viewer gives the page, and an inlined image has no
+# path to resolve.
+full = site / 'grove.html'
+full.write_text(inline((site / 'index.html').read_text()))
+print(f'wrote {full} ({full.stat().st_size // 1024} KB, self-contained document)')
+
+body = site / 'artifact.html'
+body.write_text(inline((store / 'landing.html').read_text()))
+print(f'wrote {body} ({body.stat().st_size // 1024} KB, self-contained body)')
 PYTHON
 
 printf '%s\n' "wrote $SITE/ ($(du -sh "$SITE" | cut -f1))"
