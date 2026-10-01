@@ -72,7 +72,7 @@ either left or never entered. That is the opening - not a country, a shape.
 
 | App | Verdict |
 | --- | --- |
-| **Grove** (focus timer) | **Closed.** Forest is #2 in US paid Productivity *and* in Korea's top paid chart. The same incumbent in both target markets is as closed as it gets. |
+| **Grove** (focus timer) | ~~Closed~~ **Withdrawn - see [PLAN.md](PLAN.md).** This said Forest holds both target markets. Half of that is now false: Seekrtech moved Forest to free-with-subscription in December 2025, so it has left the Korean paid chart entirely, and the seat it held in 생산성 is vacant. |
 | **Stroke** (vector sketch) | **Closed.** Procreate Pocket at $5.99 is in the US top paid overall, made by the Procreate team. |
 | **Inkwell** (encrypted journal) | **Closed, and worst of the four.** Apple ships Journal free and preinstalled with end-to-end encryption. Day One went subscription, and the one-time-purchase slot behind it already has Diarium, Journey and Mindspace in it. Competing with free-and-in-the-box is not a pricing problem. |
 | **Ledger** (envelope budget) | **Open, with a caveat.** The US paid Finance chart contains no budgeting app at all. It is the only one of the four whose chart has room. |
