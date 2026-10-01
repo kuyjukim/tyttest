@@ -28,6 +28,14 @@ cp "$STORE/screenshots/ko-2-garden.png" "$SITE/shots/garden.png"
 cp "$STORE/screenshots/ko-3-stats.png" "$SITE/shots/stats.png"
 cp "$STORE/screenshots/ko-5-dark.png"  "$SITE/shots/dark.png"
 
+# The same four again at the top level. The page falls back to these when a
+# relative path with a folder in it does not resolve - which is what a viewer
+# that gives the page an unexpected base URL does - and fetches them by these
+# names for the canvas path of last resort.
+for shot in focus garden stats dark; do
+  cp "$SITE/shots/$shot.png" "$SITE/$shot.png"
+done
+
 # landing.html is written as an artifact body: no doctype, no <head>, because
 # the artifact host wraps it in one. A real web server does not, so the
 # wrapper is reproduced here - including the small reset the host applies, or

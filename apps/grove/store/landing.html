@@ -196,7 +196,7 @@ button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
   grid-template-columns: repeat(auto-fit, minmax(8.5rem, 13rem));
 }
 .shot { display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }
-.shot img {
+.shot img, .shot canvas {
   /* height: auto is not optional here. The width and height attributes are on
      the tag so the browser reserves the right box before the image arrives,
      and without this the CSS width wins while the height attribute stays,
@@ -207,6 +207,7 @@ button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
 }
 .shot figcaption { font-size: 0.82rem; color: var(--ink-soft); }
 figure { margin: 0; }
+.diag { font-size: 0.78rem; color: var(--ink-faint); font-family: var(--data); margin-top: 0.6rem; }
 
 /* ---------- plain lists ---------- */
 .cols { display: grid; gap: clamp(1.5rem, 4vw, 2.75rem); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin-top: 2rem; }
@@ -329,11 +330,12 @@ footer p { max-width: 42em; }
 <section>
   <p class="eyebrow">화면</p>
   <h2>실제 화면</h2>
+  <p class="diag" id="shotdiag">이미지를 불러오는 중…</p>
   <div class="shots">
-    <figure class="shot"><img src="shots/focus.png" alt="타이머 화면: 다이얼과 자라는 나무" width="1320" height="2868"><figcaption>타이머를 맞추면 나무가 자랍니다</figcaption></figure>
-    <figure class="shot"><img src="shots/garden.png" alt="정원 화면: 심은 나무와 그루터기가 날짜별로 놓여 있다" width="1320" height="2868"><figcaption>끝낸 것도, 시든 것도 함께 남습니다</figcaption></figure>
-    <figure class="shot"><img src="shots/stats.png" alt="기록 화면: 오늘·연속·누적과 막대 그래프" width="1320" height="2868"><figcaption>무엇에 얼마나 집중했는지</figcaption></figure>
-    <figure class="shot"><img src="shots/dark.png" alt="다크 모드의 정원 화면" width="1320" height="2868"><figcaption>다크 모드, 시스템 테마 따라가기</figcaption></figure>
+    <figure class="shot"><img src="shots/focus.png" data-file="focus.png" alt="타이머 화면: 다이얼과 자라는 나무" width="1320" height="2868"><figcaption>타이머를 맞추면 나무가 자랍니다</figcaption></figure>
+    <figure class="shot"><img src="shots/garden.png" data-file="garden.png" alt="정원 화면: 심은 나무와 그루터기가 날짜별로 놓여 있다" width="1320" height="2868"><figcaption>끝낸 것도, 시든 것도 함께 남습니다</figcaption></figure>
+    <figure class="shot"><img src="shots/stats.png" data-file="stats.png" alt="기록 화면: 오늘·연속·누적과 막대 그래프" width="1320" height="2868"><figcaption>무엇에 얼마나 집중했는지</figcaption></figure>
+    <figure class="shot"><img src="shots/dark.png" data-file="dark.png" alt="다크 모드의 정원 화면" width="1320" height="2868"><figcaption>다크 모드, 시스템 테마 따라가기</figcaption></figure>
   </div>
 </section>
 
@@ -870,10 +872,82 @@ window.addEventListener('resize', () => {
 const scheme = window.matchMedia('(prefers-color-scheme: dark)');
 scheme.addEventListener('change', () => setTimeout(() => { paintStatics(); renderGarden(); }, 40));
 
+/* The screenshots failed to appear in a viewer that no browser here could
+   reproduce - not as the wrong size, but as broken images, both when they
+   were published files referenced by a relative path and when they were
+   inlined as data URIs. Rather than guess at the cause a fourth time, each
+   one now tries every way of getting an image onto a page in turn, and the
+   section says which way worked. Canvas is last because it is the only one
+   that touches neither the img element's source nor the CSP's image rules,
+   and this page already proves canvas works: the trees are drawn with it. */
+function resolveShots() {
+  const diag = document.getElementById('shotdiag');
+  const imgs = Array.from(document.querySelectorAll('.shot img'));
+  const won = { inline: 0, file: 0, canvas: 0, none: 0 };
+  let settled = 0;
+
+  function report() {
+    const order = [['inline', '내장'], ['file', '파일'], ['canvas', '캔버스'], ['none', '실패']];
+    const parts = order.filter(([k]) => won[k]).map(([k, label]) => label + ' ' + won[k]);
+    diag.textContent = settled < imgs.length
+      ? '이미지 불러오는 중… ' + settled + '/' + imgs.length
+      : '이미지 ' + imgs.length + '장 — ' + parts.join(' · ');
+  }
+
+  function settle(how) { won[how]++; settled++; report(); }
+
+  /* Fetches the bytes and paints them, never handing the URL to an img. */
+  async function viaCanvas(img) {
+    try {
+      const response = await fetch(img.dataset.file);
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const bitmap = await createImageBitmap(await response.blob());
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      canvas.getContext('2d').drawImage(bitmap, 0, 0);
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', img.alt);
+      img.replaceWith(canvas);
+      settle('canvas');
+    } catch (error) {
+      img.remove();
+      settle('none');
+    }
+  }
+
+  /* Second try: the same picture published at the top level, in case a
+     relative path with a folder in it is what the viewer cannot resolve. */
+  function retry(img) {
+    img.addEventListener('load', () => settle('file'), { once: true });
+    img.addEventListener('error', () => viaCanvas(img), { once: true });
+    img.src = img.dataset.file;
+    if (img.complete && img.naturalWidth === 0) viaCanvas(img);
+  }
+
+  for (const img of imgs) {
+    const inline = img.getAttribute('src').startsWith('data:');
+    // complete with no width means it has already failed - and it fails
+    // before this script runs, because the img tags are above it in the
+    // document and a blocked or missing source fails immediately. Waiting
+    // for an error event that has already been and gone is how the first
+    // version of this sat at 0 of 4 forever.
+    if (img.complete) {
+      if (img.naturalWidth > 0) settle(inline ? 'inline' : 'file');
+      else retry(img);
+      continue;
+    }
+    img.addEventListener('load', () => settle(inline ? 'inline' : 'file'), { once: true });
+    img.addEventListener('error', () => retry(img), { once: true });
+  }
+  report();
+}
+
 function boot() {
   syncText();
   paintStatics();
   renderGarden();
+  resolveShots();
   requestAnimationFrame(tick);
 }
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot); else boot();
