@@ -12,9 +12,18 @@ import 'ui/strings.dart';
 const Color ledgerAccent = Color(0xFFA85A2B);
 
 class LedgerApp extends StatelessWidget {
-  const LedgerApp({required this.store, this.locale, super.key});
+  const LedgerApp({
+    required this.store,
+    this.locale,
+    this.fontFamily,
+    super.key,
+  });
 
   final BudgetStore store;
+
+  /// Overrides the platform text face. Null in the shipped app; set by the
+  /// screenshot run, which has no platform font to fall back to.
+  final String? fontFamily;
 
   /// Forces a language, overriding the device setting.
   final Locale? locale;
@@ -27,8 +36,14 @@ class LedgerApp extends StatelessWidget {
         builder: (context, store) => MaterialApp(
           onGenerateTitle: (context) => S.of(context).appName,
           debugShowCheckedModeBanner: false,
-          theme: PaperTheme.light(accent: ledgerAccent),
-          darkTheme: PaperTheme.dark(accent: ledgerAccent),
+          theme: PaperTheme.light(
+            accent: ledgerAccent,
+            fontFamily: fontFamily,
+          ),
+          darkTheme: PaperTheme.dark(
+            accent: ledgerAccent,
+            fontFamily: fontFamily,
+          ),
           themeMode: store.budget.settings.themeMode,
           locale: locale,
           localizationsDelegates: localizationDelegates(S.delegate),

@@ -65,10 +65,10 @@ class _DaySection extends StatelessWidget {
   final Day today;
   final S strings;
 
-  String get _heading {
+  String _heading(String localeTag) {
     if (day == today) return strings.today;
     if (day == today.previous) return strings.yesterday;
-    return DateFormat.MMMEd().format(day.startOfDay);
+    return DateFormat.MMMEd(localeTag).format(day.startOfDay);
   }
 
   @override
@@ -81,7 +81,7 @@ class _DaySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
-          title: _heading,
+          title: _heading(context.localeTag),
           trailing: Text(strings.span(focused), style: context.type.numeric),
         ),
         PaperCard(
@@ -156,7 +156,7 @@ class _TreeTile extends StatelessWidget {
   }
 
   void _showDetail(BuildContext context) {
-    final time = DateFormat.jm().format(session.startedAt);
+    final time = DateFormat.jm(context.localeTag).format(session.startedAt);
     showPaperSheet<void>(
       context: context,
       title: strings.speciesName(session.species),

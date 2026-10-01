@@ -26,10 +26,16 @@ class StatsScreen extends StatefulWidget {
 class _StatsScreenState extends State<StatsScreen> {
   _Range _range = _Range.week;
 
+  /// Captured in build: the axis-label helper below has no context of its
+  /// own, and formatting a weekday for the wrong locale is how a fully
+  /// translated screen ends up with English dates on it.
+  String _localeTag = 'en';
+
   @override
   Widget build(BuildContext context) {
     final store = Scope.watch<GardenStore>(context);
     final strings = S.of(context);
+    _localeTag = context.localeTag;
 
     if (store.sessions.isEmpty) {
       return EmptyState(
@@ -110,7 +116,7 @@ class _StatsScreenState extends State<StatsScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    DateFormat.yMMMEd().format(best.day.startOfDay),
+                    DateFormat.yMMMEd(context.localeTag).format(best.day.startOfDay),
                     style: context.type.body,
                   ),
                 ),
@@ -135,7 +141,7 @@ class _StatsScreenState extends State<StatsScreen> {
   /// Seven weekday letters fit; thirty do not, and a chart whose labels
   /// collide is worse than one with sparser labels.
   String _axisLabel(DateTime day) => _range == _Range.week
-      ? DateFormat.E().format(day).substring(0, 1)
+      ? DateFormat.E(_localeTag).format(day).substring(0, 1)
       : '${day.day}';
 }
 

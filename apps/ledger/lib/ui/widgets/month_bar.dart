@@ -41,7 +41,7 @@ class MonthBar extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  DateFormat.yMMMM().format(month.firstDay.startOfDay),
+                  DateFormat.yMMMM(context.localeTag).format(month.firstDay.startOfDay),
                   textAlign: TextAlign.center,
                   style: context.type.bodyStrong,
                 ),

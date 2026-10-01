@@ -70,7 +70,7 @@ class InsightsScreen extends StatelessWidget {
           bars: [
             for (final day in start.through(today))
               Bar(
-                label: DateFormat.E().format(day.startOfDay).substring(0, 1),
+                label: DateFormat.E(context.localeTag).format(day.startOfDay).substring(0, 1),
                 value: (perDay[day] ?? 0).toDouble(),
                 highlight: day == today,
               ),

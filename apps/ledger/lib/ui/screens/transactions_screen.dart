@@ -51,6 +51,7 @@ class TransactionsScreen extends StatelessWidget {
                   transactions: transactions,
                   money: money,
                   strings: strings,
+                  localeTag: context.localeTag,
                 ),
         ),
         if (transactions.isNotEmpty)
@@ -77,17 +78,19 @@ class _TransactionList extends StatelessWidget {
     required this.transactions,
     required this.money,
     required this.strings,
+    required this.localeTag,
   });
 
   final BudgetStore store;
   final List<Txn> transactions;
   final MoneyFormat money;
   final S strings;
+  final String localeTag;
 
   String _dayLabel(Day day) {
     if (day == store.today) return strings.today;
     if (day == store.today.previous) return strings.yesterday;
-    return DateFormat.MMMEd().format(day.startOfDay);
+    return DateFormat.MMMEd(localeTag).format(day.startOfDay);
   }
 
   @override

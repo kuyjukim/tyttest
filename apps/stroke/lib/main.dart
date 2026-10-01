@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:paper/paper.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -10,6 +11,9 @@ import 'state/studio_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Loads the date symbols for every locale the app supports. Without
+  // it, a DateFormat constructed for 'ko' throws at runtime.
+  await initializeDateFormatting();
 
   final store = StudioStore(
     repository: SketchRepository(await _openStore()),

@@ -186,7 +186,7 @@ class _EntryList extends StatelessWidget {
           lastMonth = month;
           rows.add(
             SectionHeader(
-              title: DateFormat.yMMMM().format(month.startOfDay),
+              title: DateFormat.yMMMM(context.localeTag).format(month.startOfDay),
             ),
           );
         }
@@ -196,6 +196,7 @@ class _EntryList extends StatelessWidget {
           entry: entry,
           today: today,
           strings: strings,
+          localeTag: context.localeTag,
           onTap: () => onOpen(entry.id),
         ),
       );
@@ -214,18 +215,20 @@ class _EntryRow extends StatelessWidget {
     required this.entry,
     required this.today,
     required this.strings,
+    required this.localeTag,
     required this.onTap,
   });
 
   final Entry entry;
   final Day today;
   final S strings;
+  final String localeTag;
   final VoidCallback onTap;
 
   String get _dateLabel {
     if (entry.day == today) return strings.today;
     if (entry.day == today.previous) return strings.yesterday;
-    return DateFormat.MMMd().format(entry.createdAt);
+    return DateFormat.MMMd(localeTag).format(entry.createdAt);
   }
 
   @override

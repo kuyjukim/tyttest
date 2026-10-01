@@ -144,7 +144,7 @@ class _SketchRow extends StatelessWidget {
                 const SizedBox(height: Gap.xxs),
                 Text(
                   '${strings.strokeCount(summary.strokeCount)} · '
-                  '${DateFormat.yMMMd().add_jm().format(summary.updatedAt)}',
+                  '${DateFormat.yMMMd(context.localeTag).add_jm().format(summary.updatedAt)}',
                   style: context.type.caption,
                 ),
               ],

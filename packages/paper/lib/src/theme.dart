@@ -9,17 +9,26 @@ import 'typography.dart';
 /// Each app passes its own `accent`; everything else is shared so that the
 /// four apps read as one family.
 abstract final class PaperTheme {
-  static ThemeData light({required Color accent}) =>
-      _build(PaperColors.light(accent: accent));
+  static ThemeData light({required Color accent, String? fontFamily}) =>
+      _build(PaperColors.light(accent: accent), fontFamily);
 
-  static ThemeData dark({required Color accent}) =>
-      _build(PaperColors.dark(accent: accent));
+  static ThemeData dark({required Color accent, String? fontFamily}) =>
+      _build(PaperColors.dark(accent: accent), fontFamily);
 
-  static ThemeData of({required Color accent, required Brightness brightness}) =>
-      brightness == Brightness.dark ? dark(accent: accent) : light(accent: accent);
+  static ThemeData of({
+    required Color accent,
+    required Brightness brightness,
+    String? fontFamily,
+  }) => brightness == Brightness.dark
+      ? dark(accent: accent, fontFamily: fontFamily)
+      : light(accent: accent, fontFamily: fontFamily);
 
-  static ThemeData _build(PaperColors c) {
-    final type = PaperType.standard(ink: c.ink, muted: c.inkMuted);
+  static ThemeData _build(PaperColors c, [String? fontFamily]) {
+    final type = PaperType.standard(
+      ink: c.ink,
+      muted: c.inkMuted,
+      fontFamily: fontFamily,
+    );
     final scheme = ColorScheme(
       brightness: c.brightness,
       primary: c.accent,
@@ -41,6 +50,7 @@ abstract final class PaperTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: c.brightness,
+      fontFamily: fontFamily,
       colorScheme: scheme,
       scaffoldBackgroundColor: c.surface,
       canvasColor: c.surface,
