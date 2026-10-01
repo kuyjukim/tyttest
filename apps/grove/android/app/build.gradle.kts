@@ -34,6 +34,13 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // flutter_local_notifications needs this: it uses java.time to work
+        // out when a scheduled notification fires, and desugaring is what
+        // puts java.time on the Android versions below 26 that this app still
+        // supports. Without it the build fails outright at
+        // checkReleaseAarMetadata rather than at runtime, which is the right
+        // place for it to fail.
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -76,6 +83,14 @@ android {
                     ?: signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    // The version flutter_local_notifications names. The plugin's own example
+    // also adds androidx.window 1.0.0 against an old report of desugaring
+    // crashing on Android 12L; that is not copied here, because Flutter's
+    // embedding already brings androidx.window-java 1.2.0 in.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {
