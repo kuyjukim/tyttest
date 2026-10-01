@@ -195,3 +195,8 @@ Being straight about the gap between "four finished apps" and "an app on sale":
   whether an app reaches the top of a paid chart - pricing, store listing,
   screenshots, reviews and timing do. What code can do is be worth paying for
   once and not break, and that is what these four are built to be.
+- **Three of the four have no chart to climb.** Checked after the fact,
+  which was the wrong order: Forest occupies paid Productivity in both target
+  markets, Procreate Pocket occupies drawing, and Apple ships a free
+  encrypted Journal in the box. Only Ledger's chart has room, and the reasons
+  - with the case against it too - are in [MARKET.md](MARKET.md).
