@@ -5,7 +5,7 @@
 | Primary category | Finance | The paid Finance chart is the target: its incumbents are single-purpose calculators, because every real budgeting app went to a subscription and so lives in the *free* chart. |
 | Secondary category | Productivity | |
 | Age rating | 4+ | No user-generated content, no web view, no ads. |
-| Price | ₩8,000 / US$5.99 | The paid Finance incumbents sit at $2.99–$5.99. Korean budgeting apps sell lifetime unlocks at ₩25,000–29,000, but that is after a free trial; paid-upfront carries far more friction and cannot charge the same. |
+| Price | ₩8,000 / US$5.99 | The US paid Finance incumbents sit at $2.99–$5.99, and the subscriptions this is an alternative to charge $80–$109 a year. ₩8,000 sits under 편한가계부 (광고제거) at ₩8,800 and 위플 가계부 Pro at ₩17,000 - but those two *are* the top of Korea's paid Finance chart, so see `competition.md` before counting on that market. |
 | In-app purchases | None | |
 | Sign in required | No | |
 | Account deletion | Not applicable - there is no account | |

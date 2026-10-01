@@ -1,97 +1,102 @@
 # Who else is already there
 
-> **Nothing in this file has been verified.** Every store host - itunes.apple.com,
-> apps.apple.com, play.google.com, Apple's own chart RSS - is denied by this
-> environment's network policy, so none of it could be looked up. It is
-> written down because an unrecorded assumption is worse than a recorded
-> guess, and because the checks at the bottom take ten minutes on a phone and
-> settle the question properly.
+Checked 2026-10-01 by web search. The store hosts themselves
+(apps.apple.com, play.google.com, Apple's chart RSS) are denied by this
+environment's network policy, so none of this comes from the stores
+directly - it comes from search results and the pages indexing them. Numbers
+below should be re-read off a phone before anyone spends money on them, but
+they are consistent across two independent searches and with each other.
 
-## The claim this app was built on, and what is wrong with it
+## The claim this app was built on was wrong
 
-The pitch was: Korean 가계부 apps are **retrospective** - you record what you
-already spent - while envelope budgeting is **prospective**, and no
-established Korean app does the prospective thing. On that reading Ledger
-was carrying a known-good foreign genre into a market with no incumbent.
+The claim: **the paid Finance chart is uncontested by budgeting apps,
+because they all moved to subscriptions.** It was true. It was observed on
+the *US* chart and then applied to Korea, which is where the whole plan went
+wrong.
 
-Three names put that in serious doubt:
+### Korea - paid Finance, top of the chart
 
-| App | Confidence it exists | What it means for the claim |
-| --- | --- | --- |
-| **편한가계부** (Realbyte; sold abroad as Money Manager) | High | A major Korean 가계부 with a **per-category monthly budget**. So "Korean apps have no budget feature" is simply false. Free with advertising, paid tier to remove it. |
-| **위플가계부** | Fairly high it exists; **low** on its feature emphasis | Remembered as budget-leaning rather than ledger-leaning. If that is right, the "no prospective Korean app" line is gone outright. |
-| **오늘쓸돈** | Moderate | The name *is* "money to spend today" - Ledger's headline number. If the app is what its name says, 안심 지출 한도 is not a differentiator in Korea at all. |
+| # | App | Price | Reviews |
+| --- | --- | --- | --- |
+| 1 | **위플 가계부 Pro** | ₩17,000 | 4.8★ / 8,400 |
+| 2 | **편한가계부 (광고제거)** | ₩8,800 | 4.8★ / **87,000** |
+| 3 | 멤버십 위젯 Pro | | |
+| 4 | 보안카드 위젯 | | |
+| 5 | CryptoWatch | | |
+| 6 | 편한가계부 Classic | | |
 
-Treat the claim as **falsified until someone checks**, not as merely
-doubtful. Planning around it as though it still held is the expensive
-mistake.
+Three of the top six are 가계부 apps. Not "no budgeting apps in the paid
+chart" - they *are* the paid chart.
 
-## What might still be a real difference
+And look at what those two are: both are the **paid unlock of a free app**.
+편한가계부 (광고제거) is the ad-free SKU of an app with an enormous free base;
+87,000 reviews is what that base looks like from the paid side. In Korea the
+paid 가계부 market is not a separate market a new app can enter. It is the
+monetisation tail of the free one, and the way in is a free app with years
+of users, not a cold ₩8,000 purchase.
 
-A budget field is a **target**: a number to compare against at month end,
-coloured red when you pass it. An envelope is a **pot**: money that is
-somewhere, that runs out, and that has to come from another pot if you want
-more. Three mechanics follow from that, and a budget field has none of them:
+### United States - paid Finance, top of the chart
 
-1. **Moving money between envelopes mid-month.** Overspending is not an
-   error message, it is a decision about where the money comes from instead.
-2. **Rollover in both directions.** What is left carries, and so does an
-   overspend. A budget that resets on the 1st forgives going over, which is
-   the moment a budget mattered most.
-3. **All income assigned.** Income minus allocations is zero by
-   construction, rather than a budget that can quietly sum to less than you
-   earn.
+Military Retirement ($5.99), Compoundee ($2.99), 10bii Financial Calculator
+($5.99), My Currency Converter Pro ($3.99), US Debt Clock ($4.99), HP 12c
+($14.99).
 
-Whether the Korean incumbents do any of these is exactly what has not been
-checked. If 편한가계부 lets you move budget between categories mid-month and
-carries the remainder forward, Ledger has no mechanical story left and is
-competing on being paid, quiet and offline - which is a position, but a much
-smaller one.
+Calculators and converters. **No budgeting app.** Because the budgeting apps
+are all subscriptions and a subscription app is a free download - YNAB
+$14.99/mo or $109/yr, Monarch $14.99/mo or $99.99/yr, Copilot $13/mo or
+$95/yr, Goodbudget Premium $10/mo or $80/yr. Every one of them sits in the
+*free* chart and charges inside.
 
-## The thing that cuts the other way
+So the original observation holds, for the market it was made in.
 
-Ledger has **no automatic entry at all**. Korean 가계부 apps on Android read
-the card-approval SMS and fill the entry in for you, which is most of the
-daily work of keeping a 가계부. Against that, "type it in yourself" is a
-genuine disadvantage, not a philosophical stance.
+## Every differentiator that was claimed is occupied in Korea
 
-But it is a disadvantage with a shape. **iOS gives no app access to SMS**,
-so on iPhone the Korean incumbents cannot do it either - they fall back to
-open-banking connections, which need accounts and usually a subscription, or
-to the same manual entry. The gap is therefore:
+| Claimed difference | Status |
+| --- | --- |
+| "Korean 가계부 apps are retrospective, no prospective app exists" | **False.** 편한가계부 has per-category monthly budgets. |
+| Rollover of what is left | **Occupied.** 편한가계부 has a carryover setting. |
+| Rollover of an *overspend* too | **Occupied.** 위플 carries 마이너스 forward as well. |
+| "How much can I spend today" as the headline number | **Occupied.** 하루용돈 (`com.moneydaily.app`) is built entirely around it - "은행 계좌나 카드 연동 없이, 오늘 얼마까지 써도 안전한지만 알려주는" - and 마진 (하루 예산 가계부) is another. |
+| Offline, no account, data on the device | **Occupied.** 하루용돈 again: "모든 데이터는 기기에만 저장되며, 별도 회원가입이나 계좌 연동이 필요 없습니다." |
+| No ads | **Occupied.** Several, e.g. "가계부: 수입 지출 내역, 예산 관리, 저축 계획, 광고 없음". |
 
-| | Korea | English-speaking markets |
-| --- | --- | --- |
-| **iOS** | Small gap. Nobody reads SMS; a paid, offline, no-account app is a fair fight. | Smallest gap. Manual entry reads as privacy, and the subscription incumbents (YNAB and friends) have left the one-time-payment slot empty. |
-| **Android** | **Largest gap.** Competitors auto-fill from SMS and are free with ads. | Middling. |
+The only mechanic not yet found in a Korean app is **moving money between
+envelopes mid-month** - the thing that makes an envelope a pot rather than a
+target. That is one mechanic, and it is not a product.
 
-This reverses the advice given earlier in the same week - that Android
-matters more for a Korean app because Korea's Android share is high. It
-does, for most apps. For *this* app the one quadrant where the competition
-is strongest is the Korean Android one, because that is the only quadrant
-where the incumbent's biggest advantage is switched on.
+Against all that, Ledger also has **no automatic entry**, where 편한가계부
+reads the card-approval SMS and fills the row in for you. On Android that is
+most of the daily work of keeping a 가계부. On iOS no app can read SMS, so
+the gap is much smaller there - but "smaller" is not "an advantage".
 
-## What to check, and what each answer changes
+## What the English-speaking market looks like instead
 
-Ten minutes with a Korean App Store account:
+The subscription incumbents have left the one-time-payment slot open, and
+what is in it is small: Forge (zero-based, offline, no subscription),
+BudgetVault (free, browser storage), Actual Budget (free, self-hosted),
+FinancialAha (a $139 spreadsheet). Goodbudget is the envelope incumbent and
+is freemium at $80/yr for premium.
 
-1. **Search 봉투, 봉투예산, 제로베이스 in the Korean App Store.** Nothing
-   envelope-specific ranking means the genre really is unoccupied, whatever
-   the 가계부 apps do. Something ranking means read it first.
-2. **Open 편한가계부 → can you move this month's budget from one category to
-   another?** No means mechanic (1) survives as a difference.
-3. **Same app → does an unspent category budget carry into next month?**
-   No means mechanic (2) survives.
-4. **오늘쓸돈 → is the daily number the whole product, and is it free?** If
-   it is a free app built entirely around that number, drop it from Ledger's
-   headline and lead with the envelopes instead.
-5. **Korean paid Finance chart, top 20 - how many are 가계부?** This is the
-   finding the whole plan rests on. If the answer is still "none", a paid
-   envelope app has an uncontested chart to climb whatever the free apps do.
+None of them is a ₩/$ paid-upfront native app sitting in the chart. A $5.99
+paid app entering the US Finance chart is not trying to outsell YNAB - it is
+trying to outsell a currency converter and an HP calculator emulator.
 
-**Decision rule.** Questions 2 and 3 decide the product story: two noes and
-the envelope mechanics are the pitch. Question 5 decides the market: it is
-the only one that says whether a *paid* app has anywhere to rank. Question 5
-mattering more than 1-4 is the point - Ledger does not have to beat
-편한가계부 at being a 가계부. It has to be the best paid app in a chart the
-free ones are not in.
+## What this means
+
+**Korea is the wrong lead market for this app, and it was chosen on a US
+observation.** Taking Korean paid Finance #1 means outselling an app with
+87,000 reviews and a decade of free-tier funnel behind it. Nothing in this
+repo makes that likely.
+
+The thesis was not wrong - it was pointed at the wrong country. The place
+where "a paid budgeting app has an empty chart to climb" is true is the
+English-speaking App Store.
+
+That makes the Korean localisation a free extra rather than the plan: it is
+already built, it costs nothing to ship, and it may find the people who want
+an envelope app specifically. It just should not be what the listing leads
+with, and the Korean chart should not be what success is measured against.
+
+The Android advice follows the same way, and more strongly than before: the
+one quadrant where the competition is strongest is Korean Android, where
+SMS auto-entry works and the incumbents are free. See `RELEASE.md`.

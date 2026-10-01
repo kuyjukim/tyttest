@@ -117,20 +117,31 @@ whose home screen is blank. `tool/check.sh` runs it.
    applied for. Organisation accounts are exempt. Check the current rule in
    the console: this one moves, and it is weeks of calendar time either way.
 
-## Before any of this: who else is already there
+## Before any of this: read competition.md
 
-`store/competition.md`. The assumption this app was built on - that no
-established Korean app does prospective, envelope-style budgeting - has
-three named counterexamples and has never been verified from here, because
-every store host is blocked by this environment's network policy. That file
-records what is believed, how strongly, and the five checks that settle it.
-Two of them decide what the listing should lead with, so they are worth
-doing before the copy is final rather than after.
+The assumption this app was built on turned out to be wrong, and it is the
+kind of wrong that decides which store listing leads. In short: the paid
+Finance chart really is uncontested by budgeting apps - **in the United
+States**, where every budgeting app is a subscription and therefore a free
+download. In Korea the top two paid Finance apps *are* 가계부 apps, both of
+them the paid unlock of an app with a large free base, one with 87,000
+reviews.
+
+So Korea is the wrong lead market, and every differentiator the Korean
+listing claims is already occupied there. `store/competition.md` has the
+numbers and the sources. **Do not finalise the listing copy or the launch
+markets without reading it.**
 
 ## Pricing
 
-The paid Finance chart's incumbents sit at $2.99–$5.99, and Korean
-budgeting apps sell lifetime unlocks at ₩25,000–29,000 as in-app purchases
-after a free trial. Paid-upfront carries far more friction than an unlock
-someone buys after using the app, so the first list is the better guide:
-around **₩8,000 / $5.99**, not ₩1,100.
+**$5.99** for the English markets. The US paid Finance incumbents sit at
+$2.99–$5.99 (Compoundee $2.99, My Currency Converter Pro $3.99, US Debt
+Clock $4.99, Military Retirement $5.99, 10bii $5.99), so this is the top of
+the band rather than an outlier, and the subscription apps it is an
+alternative to charge $80–$109 a year.
+
+**₩8,000** for Korea, if it ships there at all. That is deliberately just
+under 편한가계부 (광고제거) at ₩8,800 and well under 위플 가계부 Pro at
+₩17,000 - but see `competition.md` before treating the Korean store as a
+market rather than a courtesy. Undercutting an app with 87,000 reviews by
+₩800 does not win anything.
