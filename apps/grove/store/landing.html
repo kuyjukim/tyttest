@@ -181,10 +181,21 @@ button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
 .sp .u { font-family: var(--data); font-size: 0.68rem; color: var(--ink-faint); }
 
 /* ---------- screenshots ---------- */
-.shots { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); margin-top: 2rem; }
+/* A 1320x2868 screenshot given a full column is 2900px tall on a desktop,
+   which is most of a section spent scrolling past four phones. Capping the
+   track keeps them at a readable size and leaves the row centred. */
+.shots {
+  display: grid; gap: 1.5rem; margin-top: 2rem; justify-content: center;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 13rem));
+}
 .shot { display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }
 .shot img {
-  width: 100%; border-radius: 16px; border: 1px solid var(--rule-firm); display: block;
+  /* height: auto is not optional here. The width and height attributes are on
+     the tag so the browser reserves the right box before the image arrives,
+     and without this the CSS width wins while the height attribute stays,
+     stretching every screenshot to its full 2868px. */
+  width: 100%; height: auto; aspect-ratio: 1320 / 2868;
+  border-radius: 16px; border: 1px solid var(--rule-firm); display: block;
   background: var(--paper-rise);
 }
 .shot figcaption { font-size: 0.82rem; color: var(--ink-soft); }

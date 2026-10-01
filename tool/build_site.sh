@@ -70,5 +70,39 @@ HEAD
   printf '</body>\n</html>\n'
 } > "$SITE/index.html"
 
+# A second build of the same page as one file, with every image inlined.
+# This is the copy to hand someone directly - open it from a USB stick, drop
+# it on Netlify, attach it to a mail - because it has no folder next to it to
+# lose. The screenshots are halved first: they ship at 1320x2868 for the App
+# Store and render about 240 wide here, so full resolution would triple the
+# file for nothing. Web fonts still come over the network; without one it
+# falls back to the system face and is perfectly readable.
+python3 - "$SITE" "$STORE" <<'PYTHON'
+import base64, pathlib, subprocess, sys, tempfile
+
+site, store = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+page = (site / 'index.html').read_text()
+
+def data_uri(path):
+    return 'data:image/png;base64,' + base64.b64encode(path.read_bytes()).decode()
+
+with tempfile.TemporaryDirectory() as tmp:
+    swaps = {'icon.png': data_uri(site / 'icon.png')}
+    for name in ('focus', 'garden', 'stats', 'dark'):
+        small = pathlib.Path(tmp) / f'{name}.png'
+        subprocess.run(['tool/shrink_png.py', str(site / 'shots' / f'{name}.png'),
+                        str(small), '2'], check=True, stdout=subprocess.DEVNULL)
+        swaps[f'shots/{name}.png'] = data_uri(small)
+
+for ref, uri in swaps.items():
+    before = page
+    page = page.replace(f'"{ref}"', f'"{uri}"')
+    assert page != before, f'nothing referenced {ref}'
+
+out = site / 'grove.html'
+out.write_text(page)
+print(f'wrote {out} ({out.stat().st_size // 1024} KB, self-contained)')
+PYTHON
+
 printf '%s\n' "wrote $SITE/ ($(du -sh "$SITE" | cut -f1))"
 printf '%s\n' "serve locally with:  python3 -m http.server -d $SITE 8000"
