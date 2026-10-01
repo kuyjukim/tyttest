@@ -173,13 +173,77 @@ system, for people who do not carry cash" is a sharper sentence than any
 comparison to a subscription app, and the research says it points at a real
 and large group.
 
+## The empty chart is a graveyard, not an opening
+
+The obvious objection to everything above: a trend with three billion views
+must have apps. It does. Two generations of them.
+
+**The new wave, all shipped in the last year, all free with in-app
+purchases:** Evie (Pro $3.99 as an IAP), Tuckle, CashBinder, PayChunk, Our
+Envelope Budget, Stuf, Stashly. Their App Store ids run 6758851094,
+6759833891, 6761709863, 6762224654, 6773762609, 6782596313 - consecutive
+enough to read as what it is, a gold rush. None of them has enough ratings
+yet to show an aggregate score.
+
+Two of their pitches are worth reading closely. Our Envelope Budget sells
+itself as **"cash stuffing without the cash"** - the exact English sentence
+proposed for Ledger one conversation earlier. Tuckle's pitch is *"never asks
+to connect your bank, keeps your budget on your device, no ads, doesn't sell
+data"*, which is Ledger's differentiator list with the serial numbers filed
+off.
+
+**The old wave, and this is the decisive part: paid-upfront envelope apps
+already exist, and have for a decade.** Envelopes: Budget Manager, $6.99 one
+time, id 804726909 - a 2014 registration. Budget Envelopes, id 1052741851,
+2015. Simple Budget Envelopes, $0.99, no sign-in and no IAP, id 1339993499,
+2018. Envy, free with a $6.99 lifetime unlock. EnvelopeBudget, $40 lifetime.
+
+None of them is in the paid Finance chart. People have been selling exactly
+this product, at exactly this price, on exactly this model, for ten years,
+and not one of them sells enough to rank.
+
+So the empty position in the US paid Finance chart is not an opening that
+nobody noticed. It is the shape of a thing that has been tried repeatedly
+and does not work. The budgeting apps are absent from that chart for the
+same reason there are no footprints in quicksand.
+
+## The mistake, three times
+
+This file exists because a market claim was made without checking. The claim
+was then corrected, and the correction was made without checking, and so on:
+
+1. **"No Korean app does prospective budgeting."** 편한가계부, 위플 and
+   하루용돈. Falsified by three names in a chat message.
+2. **"The paid Finance chart has no budgeting app, so there is room."** True
+   of the US chart, false of the Korean one, where the top two paid Finance
+   apps are 가계부. Falsified by one search.
+3. **"The English envelope genre has an open paid slot."** Seven new free
+   apps this year and four paid ones going back to 2014, none charting.
+   Falsified by one more search.
+
+The same error every time: reading an absence of evidence as evidence of an
+absence. And an empty chart position never once turned out to be an opening.
+Each time it was an artifact - of how that market monetises, or of a product
+that has been tried and does not sell. **Emptiness in a chart is the market
+having already answered.**
+
+Whatever is attempted next, the check comes first, and the check is not
+"does this look empty" but "who tried this and what happened to them".
+
 ## What has a chance
 
-1. **Ledger, in the US paid Finance chart.** Ten categories checked and this
-   is the one verified-empty tooling position found. It is also already
-   built, localised and submission-ready. The bet is unproven (see the
-   caveat above) but it costs one upload to settle, and settling it produces
-   a real number instead of more inference.
+1. ~~**Ledger, in the US paid Finance chart.**~~ **Withdrawn.** It was the
+   one verified-empty position found in ten categories, and then the
+   emptiness turned out to be the point: paid-upfront envelope apps have
+   been on sale since 2014 at $0.99 to $6.99 and none of them charts, while
+   seven free ones shipped this year. Ledger as a cold paid-upfront app
+   aiming at a chart position has no case left.
+
+   The app is still good and still finished. What it does not have is a
+   route to the top of a paid chart, which was the goal. If it ships, it
+   should ship for a reason other than that - and free with a one-time
+   unlock, which is both what this market does and what Korea proved people
+   will pay for, is a different plan needing a different decision.
 
 2. **A second bet has to carry data, not UI.** If one is wanted, the shape
    is: public-domain or computable data, offline, in a domain where being
