@@ -94,9 +94,65 @@ budget app they have not already used. That is the actual bet, and it is
 unproven rather than supported. It is worth taking because the cost of
 taking it is one submission, not because the research says it will work.
 
-## If a second bet is wanted
+## The full sweep, and what it says
 
-Hunt the Noir shape, not a country: one job, narrow enough that no one can
-build a subscription on it, in a category where the incumbents are
-subscriptions or nothing. Check the chart *before* building, which is the
-one thing this repository did in the wrong order.
+Ten categories checked, both markets. Beyond the four already shown:
+
+| Category (US, paid) | Top of the chart |
+| --- | --- |
+| Education | AnkiMobile $24.99 · SkyView $2.99 · Prepware Aviation $9.99 (four Prepware SKUs in the chart) · TLC Practice exam $29.99 · Lineman's Reference $19.99 · HamStudy $3.99 |
+| Reference | e-Sword (Bible) · CCW 50 State · **Knots 3D · Knot IQ · Animated Knots** · Sibley Birds · SkySafari · FAR/AIM |
+| Medical | Monash FODMAP $7.99 · Pedi STAT $7.99 · ASCCP $14.99 · Essential Anatomy $19.99 · **Vargo Anesthesia $99.99** · Human Anatomy Atlas $24.99 · EMT PASS $32.99 |
+| Travel | PeakFinder $4.99 · LiveATC $4.99 · HappyCow $4.99 · OBD Fusion $9.99 · Roadside America $3.99 · **Boondocking, USFS & BLM Campgrounds, RV Dump Stations — three apps, one developer** |
+| Weather | RadarScope $9.99 · MyRadar Pro $5.99 · lightning, earthquake, hurricane, aurora trackers · My Moon Phase Pro $3.99 |
+| Food & Drink | **Paprika Recipe Manager 3 $4.99** (54,000 ratings) · then cookbooks |
+| Health & Fitness | The Wonder Weeks · 75 Hard · AutoSleep · My Macros+ · HeartWatch · Streaks · Couch to 5K |
+
+Read down that list and the paid chart stops looking like a set of
+categories and starts looking like one thing:
+
+**Paid charts are won by apps that carry a body of data or domain knowledge,
+offline, bought once.** Knot diagrams. Bird plates. Aviation question banks.
+Clinical protocols. Campground coordinates. Peak elevations. Radar feeds.
+Recipes. The app is the delivery mechanism; the thing being bought is what
+is inside it.
+
+The apps that sell pure *tooling* - Things 3, Paprika, Procreate Pocket,
+Shadowrocket, Noir, Forest, AnkiMobile - are all entrenched, years old, with
+rating counts in the tens of thousands. Noir is the exception that proves
+the rule: $2.99 for one job, and it got there by being early to a job that
+had just come into existence.
+
+**All four apps in this repository are pure tooling with no data in them.**
+That is the structural reason three of the four are closed and not a
+coincidence of category. In a paid chart the tooling positions are held by
+decade-old incumbents, and the positions that are open are data positions.
+
+Checking also killed the obvious candidates. Trade exam prep looked open -
+it is not, CDL and electrician both have a swarm of free-with-IAP apps, one
+charging $29.99 a month. Moon phase looked computable and open - the free
+versions have 37,000 and 60,000 ratings, and the paid Pro is ninth. The
+niches that *are* open in Education are narrow licences too small for a
+freemium business to chase: NYC taxi, linemen, ham radio, aviation
+maintenance. Narrow is the requirement, not a side effect.
+
+## What has a chance
+
+1. **Ledger, in the US paid Finance chart.** Ten categories checked and this
+   is the one verified-empty tooling position found. It is also already
+   built, localised and submission-ready. The bet is unproven (see the
+   caveat above) but it costs one upload to settle, and settling it produces
+   a real number instead of more inference.
+
+2. **A second bet has to carry data, not UI.** If one is wanted, the shape
+   is: public-domain or computable data, offline, in a domain where being
+   correct is hard and this repository has already shown it can be - money
+   arithmetic, DST-safe calendars, cryptography. Ephemeris and tide tables
+   compute from first principles and are nobody's copyright; the IANA
+   database is public; a small curated location set is what three of the
+   top-ten paid Travel apps are.
+
+   **Chart-check the specific idea before writing any of it.** The yield
+   here was one open position in ten categories. That is the base rate, and
+   it is the argument for shipping what exists rather than hunting for
+   something better.
