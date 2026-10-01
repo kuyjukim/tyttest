@@ -181,7 +181,14 @@ button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
 .sp .u { font-family: var(--data); font-size: 0.68rem; color: var(--ink-faint); }
 
 /* ---------- screenshots ---------- */
-/* A 1320x2868 screenshot given a full column is 2900px tall on a desktop,
+/* No loading="lazy" on these screenshots, deliberately. The whole page is
+   under a megabyte, so lazy loading saves nothing worth having, and inside a
+   viewer that scrolls the page in an iframe the browser can fail to decide
+   they ever entered the viewport, so they never load at all - which looks
+   exactly like four broken images. The width and height attributes stay:
+   they reserve the box so nothing jumps while the image arrives.
+
+   A 1320x2868 screenshot given a full column is 2900px tall on a desktop,
    which is most of a section spent scrolling past four phones. Capping the
    track keeps them at a readable size and leaves the row centred. */
 .shots {
@@ -323,10 +330,10 @@ footer p { max-width: 42em; }
   <p class="eyebrow">화면</p>
   <h2>실제 화면</h2>
   <div class="shots">
-    <figure class="shot"><img src="shots/focus.png" alt="타이머 화면: 다이얼과 자라는 나무" loading="lazy" width="1320" height="2868"><figcaption>타이머를 맞추면 나무가 자랍니다</figcaption></figure>
-    <figure class="shot"><img src="shots/garden.png" alt="정원 화면: 심은 나무와 그루터기가 날짜별로 놓여 있다" loading="lazy" width="1320" height="2868"><figcaption>끝낸 것도, 시든 것도 함께 남습니다</figcaption></figure>
-    <figure class="shot"><img src="shots/stats.png" alt="기록 화면: 오늘·연속·누적과 막대 그래프" loading="lazy" width="1320" height="2868"><figcaption>무엇에 얼마나 집중했는지</figcaption></figure>
-    <figure class="shot"><img src="shots/dark.png" alt="다크 모드의 정원 화면" loading="lazy" width="1320" height="2868"><figcaption>다크 모드, 시스템 테마 따라가기</figcaption></figure>
+    <figure class="shot"><img src="shots/focus.png" alt="타이머 화면: 다이얼과 자라는 나무" width="1320" height="2868"><figcaption>타이머를 맞추면 나무가 자랍니다</figcaption></figure>
+    <figure class="shot"><img src="shots/garden.png" alt="정원 화면: 심은 나무와 그루터기가 날짜별로 놓여 있다" width="1320" height="2868"><figcaption>끝낸 것도, 시든 것도 함께 남습니다</figcaption></figure>
+    <figure class="shot"><img src="shots/stats.png" alt="기록 화면: 오늘·연속·누적과 막대 그래프" width="1320" height="2868"><figcaption>무엇에 얼마나 집중했는지</figcaption></figure>
+    <figure class="shot"><img src="shots/dark.png" alt="다크 모드의 정원 화면" width="1320" height="2868"><figcaption>다크 모드, 시스템 테마 따라가기</figcaption></figure>
   </div>
 </section>
 
