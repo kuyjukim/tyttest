@@ -1,0 +1,862 @@
+<title>그로브 Grove</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column that follows the app's own sequence - set the dial,
+   watch it grow, keep it or lose it - with each band a step in that order. */
+:root {
+  --paper:      #F5F8F1;
+  --paper-sunk: #EAEFE3;
+  --paper-rise: #FFFFFF;
+  --ink:        #18211B;
+  --ink-soft:   #4D5B4E;
+  --ink-faint:  #76846F;
+  --pine:       #2F7D5B;
+  --pine-deep:  #1B4330;
+  --leaf:       #7FB463;
+  --bark:       #7C6A52;
+  --stump:      #8E938A;
+  --rule:       rgba(24, 33, 27, 0.12);
+  --rule-firm:  rgba(24, 33, 27, 0.26);
+
+  --display: 'Gowun Batang', 'Nanum Myeongjo', Georgia, serif;
+  --body: 'IBM Plex Sans KR', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  --data: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:      #101A14;
+    --paper-sunk: #0A110D;
+    --paper-rise: #192520;
+    --ink:        #E9F0E4;
+    --ink-soft:   #A8B8A5;
+    --ink-faint:  #7D8C7B;
+    --pine:       #74C89B;
+    --pine-deep:  #9BD9B6;
+    --leaf:       #8FC472;
+    --bark:       #9C8767;
+    --stump:      #7A8077;
+    --rule:       rgba(233, 240, 228, 0.14);
+    --rule-firm:  rgba(233, 240, 228, 0.30);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:      #101A14;
+  --paper-sunk: #0A110D;
+  --paper-rise: #192520;
+  --ink:        #E9F0E4;
+  --ink-soft:   #A8B8A5;
+  --ink-faint:  #7D8C7B;
+  --pine:       #74C89B;
+  --pine-deep:  #9BD9B6;
+  --leaf:       #8FC472;
+  --bark:       #9C8767;
+  --stump:      #7A8077;
+  --rule:       rgba(233, 240, 228, 0.14);
+  --rule-firm:  rgba(233, 240, 228, 0.30);
+  color-scheme: dark;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  /* Korean has no spaces inside a word but plenty between them, and the
+     default break-anywhere rule will split 나무 across two lines. keep-all
+     makes the browser break at the spaces the way a Korean reader expects. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+* { box-sizing: border-box; }
+
+.wrap {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding-inline: 20px;
+  padding-block: 0;
+}
+section { padding-block: clamp(3.25rem, 8vw, 5.5rem); }
+section + section { border-top: 1px solid var(--rule); }
+
+h1, h2, h3 { font-family: var(--display); font-weight: 700; text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: clamp(2.1rem, 7vw, 3.4rem); letter-spacing: -0.015em; }
+h2 { font-size: clamp(1.55rem, 4.2vw, 2.15rem); }
+h3 { font-size: 1.0625rem; font-family: var(--body); font-weight: 600; line-height: 1.5; }
+p { margin: 0; max-width: 34em; }
+.eyebrow {
+  font-family: var(--data);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+/* ---------- masthead ---------- */
+.mast { display: flex; align-items: center; gap: 0.85rem; padding-block: 1.6rem 0; }
+.mast img { width: 40px; height: 40px; border-radius: 10px; display: block; }
+.mast .name { font-family: var(--display); font-weight: 700; font-size: 1.2rem; letter-spacing: 0.01em; }
+.mast .tag { margin-inline-start: auto; font-size: 0.8rem; color: var(--ink-faint); font-family: var(--data); }
+
+/* ---------- hero ---------- */
+.hero { display: grid; gap: clamp(2rem, 5vw, 3.5rem); grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 860px) { .hero { grid-template-columns: 1fr 22rem; } }
+.hero-copy { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+.lede { font-size: clamp(1.05rem, 2.4vw, 1.2rem); color: var(--ink-soft); }
+.lede b { font-weight: 600; color: var(--ink); }
+
+.status {
+  display: inline-flex; align-items: baseline; gap: 0.55rem;
+  font-size: 0.85rem; color: var(--ink-soft);
+  border: 1px solid var(--rule-firm); border-radius: 999px;
+  padding: 0.3rem 0.85rem; align-self: flex-start;
+}
+.status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pine); transform: translateY(-1px); }
+
+/* ---------- the demo ---------- */
+.demo {
+  background: var(--paper-rise);
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  padding: 1.5rem 1.25rem 1.25rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.9rem;
+  min-width: 0;
+}
+.dialwrap { position: relative; width: min(19rem, 100%); aspect-ratio: 1; touch-action: none; }
+.dialwrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.dialwrap:focus-visible { outline: 2px solid var(--pine); outline-offset: 6px; border-radius: 50%; }
+.readout { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+.readout .big {
+  font-family: var(--data); font-weight: 500; font-size: 1.9rem; line-height: 1.2;
+  font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.readout .sub { font-size: 0.78rem; color: var(--ink-faint); }
+
+.controls { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+button {
+  font-family: var(--body); font-size: 0.9rem; font-weight: 500;
+  border-radius: 999px; padding: 0.5rem 1.4rem; cursor: pointer;
+  border: 1px solid transparent; transition: background-color .15s, border-color .15s, color .15s;
+}
+button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+.primary { background: var(--pine); color: #fff; }
+.primary:hover { background: var(--pine-deep); }
+:root[data-theme="dark"] .primary, html:not([data-theme="light"]) .primary { color: #0A110D; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .primary { color: #fff; } }
+:root[data-theme="light"] .primary { color: #fff; }
+.ghost { background: transparent; color: var(--ink-soft); border-color: var(--rule-firm); }
+.ghost:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+.verdict { font-size: 0.875rem; min-height: 1.6em; text-align: center; color: var(--ink-soft); }
+.verdict b { color: var(--ink); font-weight: 600; }
+.note { font-size: 0.75rem; color: var(--ink-faint); text-align: center; max-width: 24em; }
+
+.gardenstrip { width: 100%; border-top: 1px solid var(--rule); padding-top: 0.85rem; }
+.gardenstrip .label { font-size: 0.72rem; color: var(--ink-faint); font-family: var(--data); letter-spacing: 0.08em; }
+.plots { display: flex; gap: 2px; align-items: flex-end; overflow-x: auto; padding-top: 0.35rem; min-height: 56px; }
+.plots canvas { width: 44px; height: 52px; flex: 0 0 auto; }
+.plots .empty { font-size: 0.78rem; color: var(--ink-faint); align-self: center; }
+
+/* ---------- rule / three states ---------- */
+.states { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); margin-top: 2rem; }
+.state { display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; }
+.state canvas { width: 100%; height: 150px; }
+.state .cap { font-family: var(--data); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+.state p { font-size: 0.9rem; color: var(--ink-soft); }
+
+/* ---------- species ---------- */
+.species { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(7.2rem, 1fr)); margin-top: 2rem; }
+.sp {
+  background: transparent; border: 1px solid var(--rule); border-radius: 14px;
+  padding: 0.6rem 0.4rem 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+  cursor: pointer; min-width: 0;
+}
+.sp:hover { border-color: var(--ink-faint); }
+.sp[aria-pressed="true"] { border-color: var(--pine); background: var(--paper-rise); }
+.sp canvas { width: 100%; max-width: 86px; height: 92px; }
+.sp .n { font-size: 0.85rem; font-weight: 500; color: var(--ink); }
+.sp .u { font-family: var(--data); font-size: 0.68rem; color: var(--ink-faint); }
+
+/* ---------- screenshots ---------- */
+.shots { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); margin-top: 2rem; }
+.shot { display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }
+.shot img {
+  width: 100%; border-radius: 16px; border: 1px solid var(--rule-firm); display: block;
+  background: var(--paper-rise);
+}
+.shot figcaption { font-size: 0.82rem; color: var(--ink-soft); }
+figure { margin: 0; }
+
+/* ---------- plain lists ---------- */
+.cols { display: grid; gap: clamp(1.5rem, 4vw, 2.75rem); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin-top: 2rem; }
+.block { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.block p, .block li { font-size: 0.925rem; color: var(--ink-soft); }
+ul { margin: 0; padding-inline-start: 1.1rem; }
+li { margin-block: 0.15rem; }
+li::marker { color: var(--ink-faint); }
+
+.ledger { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem; }
+.ledger th, .ledger td { text-align: start; padding: 0.55rem 0.75rem 0.55rem 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+.ledger th { font-weight: 500; color: var(--ink); width: 45%; }
+.ledger td { color: var(--ink-soft); }
+.ledger td.done { color: var(--pine); font-family: var(--data); font-size: 0.8rem; }
+.ledger td.todo { color: var(--ink-faint); font-family: var(--data); font-size: 0.8rem; }
+
+.priv dt { font-weight: 600; font-size: 0.9rem; margin-top: 1rem; }
+.priv dd { margin: 0.15rem 0 0; font-size: 0.9rem; color: var(--ink-soft); max-width: 40em; }
+.blank { border-bottom: 1px dashed var(--rule-firm); padding-inline: 2.5rem; color: var(--ink-faint); }
+
+footer { padding-block: 2.5rem 3.5rem; border-top: 1px solid var(--rule); font-size: 0.82rem; color: var(--ink-faint); }
+footer p { max-width: 42em; }
+
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; } }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <img src="icon.png" alt="">
+    <span class="name">그로브</span>
+    <span class="tag">Grove</span>
+  </header>
+</div>
+
+<div class="wrap">
+<section class="hero" id="top">
+  <div class="hero-copy">
+    <p class="eyebrow">집중 타이머 · iOS</p>
+    <h1>끝낸 세션만 나무로 남습니다</h1>
+    <p class="lede">타이머를 맞추면 나무가 자랍니다. 끝까지 하면 정원에 영구히 남고, 중간에 그만두면 시들어 그루터기로 남습니다. <b>구독 없이 한 번만 결제합니다.</b></p>
+    <p class="lede">계정도, 로그인도, 광고도 없습니다. 앱 안에 네트워크 코드 자체가 없어서, 기록이 나갈 곳이 없습니다.</p>
+    <span class="status"><span class="dot"></span> 출시 준비 중 · 아직 App Store에 없습니다</span>
+  </div>
+
+  <div class="demo">
+    <div class="dialwrap" id="dialwrap" tabindex="0" role="slider"
+         aria-label="세션 길이" aria-valuemin="5" aria-valuemax="120" aria-valuenow="25" aria-valuetext="25분">
+      <canvas id="dial"></canvas>
+    </div>
+    <div class="readout">
+      <span class="big" id="clock">25:00</span>
+      <span class="sub" id="sublabel">드래그해서 시간을 바꿔 보세요</span>
+    </div>
+    <div class="controls">
+      <button class="primary" id="go">시작</button>
+      <button class="ghost" id="quit">포기</button>
+    </div>
+    <p class="verdict" id="verdict">25분을 끝내면 이 나무가 정원에 남습니다.</p>
+    <p class="note">미리보기라서 빠르게 돌아갑니다. 실제 세션은 맞춘 시간만큼 걸립니다.</p>
+    <div class="gardenstrip">
+      <span class="label">미리보기 정원</span>
+      <div class="plots" id="plots"><span class="empty">아직 비어 있습니다</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">규칙</p>
+  <h2>절반 한 것은 절반이 아니라 0입니다</h2>
+  <p class="lede" style="margin-top:0.9rem">중단한 세션은 아무것도 주지 않습니다. 수종 해금도, 연속 기록도, 누적 시간도 완료한 세션만 셉니다. 절반쯤 하다 그만둔 것을 절반의 성취로 쳐주는 앱은 결국 아무것도 끝내지 않게 만듭니다.</p>
+  <div class="states">
+    <div class="state">
+      <canvas data-state="growing"></canvas>
+      <span class="cap">진행 중</span>
+      <p>줄기가 먼저 서고, 가지가 세대별로 갈라지고, 마지막에 잎이 납니다. 몇 분마다 눈에 띄게 달라지도록 단계를 나눠 놨습니다.</p>
+    </div>
+    <div class="state">
+      <canvas data-state="done"></canvas>
+      <span class="cap">완료</span>
+      <p>정원에 영구히 남습니다. 누적 시간에 더해지고, 연속 기록이 이어지고, 다음 수종에 가까워집니다.</p>
+    </div>
+    <div class="state">
+      <canvas data-state="failed"></canvas>
+      <span class="cap">중단</span>
+      <p>시들어 그루터기로 남습니다. 지워 주지 않습니다. 지워 주지 않는 쪽이 정직하고, 보고 있으면 다음 세션을 끝내게 됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">엄격 모드</p>
+  <h2>나가면 죽습니다. 끌 수도 있습니다.</h2>
+  <div class="cols">
+    <div class="block">
+      <h3>켜 두면</h3>
+      <p>집중 중에 앱을 벗어나는 순간 나무가 죽습니다. 다만 20초 이내의 짧은 이탈은 봐 줍니다. iOS는 전화나 시스템 알림으로 앱을 가릴 수 있고, 그것 때문에 50분을 잃는 건 부당합니다.</p>
+    </div>
+    <div class="block">
+      <h3>끄면</h3>
+      <p>앱을 벗어나도 타이머는 계속 돌아갑니다. 어느 쪽이 맞는지는 그날 하는 일에 따라 다르므로, 둘 다 있습니다.</p>
+    </div>
+    <div class="block">
+      <h3>앱을 꺼도 도망칠 수 없습니다</h3>
+      <p>세션은 시작하는 순간 디스크에 기록됩니다. 앱을 강제 종료하는 것이 시든 나무를 피하는 가장 싼 방법이 되면, 그건 더 이상 약속이 아닙니다.</p>
+    </div>
+    <div class="block">
+      <h3>끝나면 알려 줍니다</h3>
+      <p>화면을 끄고 폰을 엎어 둬도 됩니다. 앱이 화면에 없는 동안 세션이 끝나면 알림이 옵니다. 보고 있을 때는 보내지 않습니다. 카운트다운이 이미 말해 주니까요.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">수종</p>
+  <h2>나무 일곱 종, 그때그때 그립니다</h2>
+  <p class="lede" style="margin-top:0.9rem">그려 둔 그림이 아니라 매번 계산해서 그립니다. 같은 수종이라도 심을 때마다 가지가 다르게 갈라집니다. 누적 집중 시간으로 해금됩니다. 눌러 보면 위 미리보기에 그 나무가 심어집니다.</p>
+  <div class="species" id="species"></div>
+</section>
+
+<section>
+  <p class="eyebrow">화면</p>
+  <h2>실제 화면</h2>
+  <div class="shots">
+    <figure class="shot"><img src="shots/focus.png" alt="타이머 화면: 다이얼과 자라는 나무" loading="lazy" width="1320" height="2868"><figcaption>타이머를 맞추면 나무가 자랍니다</figcaption></figure>
+    <figure class="shot"><img src="shots/garden.png" alt="정원 화면: 심은 나무와 그루터기가 날짜별로 놓여 있다" loading="lazy" width="1320" height="2868"><figcaption>끝낸 것도, 시든 것도 함께 남습니다</figcaption></figure>
+    <figure class="shot"><img src="shots/stats.png" alt="기록 화면: 오늘·연속·누적과 막대 그래프" loading="lazy" width="1320" height="2868"><figcaption>무엇에 얼마나 집중했는지</figcaption></figure>
+    <figure class="shot"><img src="shots/dark.png" alt="다크 모드의 정원 화면" loading="lazy" width="1320" height="2868"><figcaption>다크 모드, 시스템 테마 따라가기</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">값</p>
+  <h2>한 번 결제하면 끝입니다</h2>
+  <div class="cols">
+    <div class="block">
+      <h3>구독이 없습니다</h3>
+      <p>집중하는 습관을 들이려고 매달 돈이 빠져나가는 앱을 쓰는 것은 앞뒤가 맞지 않습니다. 가격은 <b style="color:var(--ink)">₩1,500</b> 예정이고, 그게 전부입니다. 앱 내 구매도, 광고도, 프리미엄 등급도 없습니다.</p>
+    </div>
+    <div class="block">
+      <h3>네트워크 기능이 아예 없습니다</h3>
+      <p>“수집하지 않습니다”가 아니라, 앱 안에 네트워크 코드 자체가 없습니다. 계정도, 로그인도, 랭킹도, 친구 목록도 없습니다. 비행기 모드에서 똑같이 동작합니다.</p>
+    </div>
+    <div class="block">
+      <h3>하지 않는 것</h3>
+      <p>친구와 같이 집중하기, 순위표, 나무 심기 기부 연동은 없습니다. 전부 서버와 계정이 필요한 다른 종류의 앱입니다. 이건 혼자 쓰는 타이머이고, 그래서 아무것도 요구하지 않습니다.</p>
+    </div>
+    <div class="block">
+      <h3>그 밖에</h3>
+      <ul>
+        <li>한국어 / English</li>
+        <li>다크 모드, 시스템 테마 따라가기</li>
+        <li>하루 목표와 연속 기록</li>
+        <li>7일 · 30일 그래프, 최고 기록일</li>
+        <li>세션마다 한 줄 메모, 항목별 집계</li>
+        <li>진동 피드백 (끌 수 있습니다)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="eyebrow">상태</p>
+  <h2>지금 어디까지 왔나</h2>
+  <p class="lede" style="margin-top:0.9rem">아직 App Store에 올라가 있지 않습니다. 이 페이지에 적힌 것 중 지어낸 기능은 없지만, 아직 사람이 쓴 적도 없습니다.</p>
+  <table class="ledger">
+    <tbody>
+      <tr><th>앱 본체</th><td>테스트 106개 통과</td><td class="done">완료</td></tr>
+      <tr><th>아이콘 · 개인정보 매니페스트</th><td>iOS 전 사이즈, Android 적응형 아이콘</td><td class="done">완료</td></tr>
+      <tr><th>스토어 문구 · 스크린샷</th><td>한국어 / English, 기기 해상도 골든 파일</td><td class="done">완료</td></tr>
+      <tr><th>iOS · Android 빌드</th><td>CI에서 두 플랫폼 모두 컴파일</td><td class="done">완료</td></tr>
+      <tr><th>Apple 개발자 계정</th><td>연 $99</td><td class="todo">남음</td></tr>
+      <tr><th>서명 · 실기기 확인</th><td>알림이 실제로 뜨는지는 폰에서만 확인됩니다</td><td class="todo">남음</td></tr>
+      <tr><th>심사 제출</th><td></td><td class="todo">남음</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="privacy">
+  <p class="eyebrow">개인정보</p>
+  <h2>개인정보 처리방침</h2>
+  <dl class="priv">
+    <dt>수집하는 정보</dt>
+    <dd>없습니다. 이 앱에는 네트워크 통신 코드가 들어 있지 않습니다. 이름, 이메일, 기기 식별자, 위치, 사용 기록 중 어느 것도 수집하거나 전송하지 않습니다.</dd>
+
+    <dt>기록이 저장되는 곳</dt>
+    <dd>세션 기록과 설정은 기기 내부의 앱 전용 디렉터리에만 저장됩니다. 다른 앱은 읽을 수 없고, 앱은 그것을 어디로도 보내지 않습니다.</dd>
+
+    <dt>제3자 제공 · 광고 · 분석</dt>
+    <dd>없습니다. 광고 SDK도, 분석 SDK도, 크래시 리포팅도 넣지 않았습니다.</dd>
+
+    <dt>휴대폰 자체 백업</dt>
+    <dd>기기의 OS 백업(iCloud 등)을 켜 두셨다면, 다른 앱과 마찬가지로 이 앱의 파일도 그 백업에 포함됩니다. 그건 사용자와 Apple 사이의 일이고, 개발자는 볼 수 없습니다.</dd>
+
+    <dt>알림</dt>
+    <dd>세션이 끝날 때 기기 안에서 만들어지는 로컬 알림만 사용합니다. 서버에서 보내는 푸시가 아니며, 알림을 쓰기 위해 어떤 정보도 외부로 나가지 않습니다. 설정에서 끌 수 있습니다.</dd>
+
+    <dt>삭제</dt>
+    <dd>앱 안의 ‘모든 나무 삭제’로 기록을 지울 수 있고, 앱을 삭제하면 저장된 것이 전부 함께 사라집니다. 서버에 사본이 없으므로 따로 요청하실 일이 없습니다.</dd>
+
+    <dt>아동</dt>
+    <dd>수집하는 정보가 없으므로 연령에 따른 구분이 없습니다.</dd>
+
+    <dt>문의</dt>
+    <dd>제출 전에 연락처를 여기에 넣어야 합니다 — <span class="blank">&nbsp;</span></dd>
+  </dl>
+</section>
+</div>
+
+<div class="wrap">
+<footer>
+  <p>그로브는 광고도 계정도 서버도 없는 유료 집중 타이머입니다. 이 페이지의 나무는 앱과 같은 방식으로 — 같은 재귀 구조와 같은 수종 값으로 — 그 자리에서 계산해 그립니다. 그림 파일이 아닙니다.</p>
+</footer>
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- species: the app's own table ---------------- */
+const SPECIES = [
+  { key:'sprout', ko:'새싹',   unlock:0,    depth:4, branchAngle:0.46, lengthRatio:0.74, trunk:'#7C6A52', leaf:'#6FAE5A', canopy:'cluster',  slender:0.062 },
+  { key:'pine',   ko:'소나무', unlock:120,  depth:5, branchAngle:0.34, lengthRatio:0.70, trunk:'#6B5B47', leaf:'#2F6B4A', canopy:'needle',   slender:0.052 },
+  { key:'maple',  ko:'단풍나무', unlock:420, depth:6, branchAngle:0.52, lengthRatio:0.73, trunk:'#6E5540', leaf:'#CC5A35', canopy:'cluster',  slender:0.070 },
+  { key:'ginkgo', ko:'은행나무', unlock:900, depth:6, branchAngle:0.44, lengthRatio:0.75, trunk:'#7A6B55', leaf:'#E0B341', canopy:'fan',      slender:0.058 },
+  { key:'willow', ko:'버드나무', unlock:1800, depth:6, branchAngle:0.60, lengthRatio:0.76, trunk:'#5F5340', leaf:'#7FA05C', canopy:'trailing', slender:0.055 },
+  { key:'cherry', ko:'벚나무',  unlock:3000, depth:6, branchAngle:0.56, lengthRatio:0.72, trunk:'#5A4639', leaf:'#E8A0BC', canopy:'cluster',  slender:0.064 },
+  { key:'baobab', ko:'바오밥',  unlock:6000, depth:5, branchAngle:0.66, lengthRatio:0.66, trunk:'#8A7B63', leaf:'#5E8F4E', canopy:'cluster',  slender:0.125 },
+];
+
+/* ---------------- colour helpers ---------------- */
+function hexToHsl(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0; const l = (max + min) / 2;
+  const d = max - min;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60; if (h < 0) h += 360;
+  }
+  return [h, s, l];
+}
+const hsl = (h, s, l) => `hsl(${h.toFixed(1)} ${(s * 100).toFixed(1)}% ${(l * 100).toFixed(1)}%)`;
+/** Lightens (f > 1) or darkens a colour, the way TreePainter._shift does. */
+function shift(hex, f) { const [h, s, l] = hexToHsl(hex); return hsl(h, s, Math.min(1, Math.max(0, l * f))); }
+/** Pulls a colour toward grey, the way TreePainter._drain does, for dead wood. */
+function drain(hex, amount) { const [h, s, l] = hexToHsl(hex); return hsl(h, s * (1 - amount), Math.min(1, l * 0.85)); }
+
+/* ---------------- the painter ---------------- */
+/* A port of lib/ui/widgets/tree_figure.dart: same staged growth, same branch
+   recursion, same canopy shapes, same species constants. Only the random
+   source differs - Dart's Random and this one do not agree on a seed - so a
+   given seed draws a tree of the same character, not the same tree. */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+function drawTree(ctx, w, h, opts) {
+  const sp = opts.species;
+  const growth = clamp01(opts.growth);
+  const withered = !!opts.withered;
+  const sway = opts.sway || 0;
+  const depth = Math.min(sp.depth, opts.depthLimit || sp.depth);
+  const stageCount = depth + 2;
+  const rnd = mulberry32(opts.seed);
+  const stage = i => easeOutCubic(clamp01((growth - i * (1 / stageCount)) * stageCount));
+
+  if (opts.ground !== false) {
+    const gw = w * (0.26 + 0.1 * growth);
+    ctx.fillStyle = opts.groundColor;
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h, gw / 2, h * 0.055 / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (growth <= 0) return;
+
+  const leaves = [];
+  const trunkLength = h * 0.34;
+
+  ctx.beginPath();
+  (function branch(ox, oy, angle, length, width, generation) {
+    const extension = stage(generation);
+    if (extension <= 0) return;
+
+    const lean = (rnd() - 0.5) * 0.18;
+    const droop = withered ? 0.30 * generation : 0;
+    const breeze = sway === 0 ? 0 : Math.sin(sway + generation * 0.9) * 0.016 * generation;
+    const a = angle + lean + droop * Math.sign(angle) + breeze;
+
+    const len = length * extension;
+    const tx = ox + Math.sin(a) * len;
+    const ty = oy - Math.cos(a) * len;
+    const tipWidth = width * 0.68;
+
+    // A filled, tapering quad. A stroked line of constant width looks like wire.
+    const nx = Math.cos(a), ny = Math.sin(a);
+    ctx.moveTo(ox - nx * width / 2, oy - ny * width / 2);
+    ctx.lineTo(ox + nx * width / 2, oy + ny * width / 2);
+    ctx.lineTo(tx + nx * tipWidth / 2, ty + ny * tipWidth / 2);
+    ctx.lineTo(tx - nx * tipWidth / 2, ty - ny * tipWidth / 2);
+    ctx.closePath();
+
+    if (generation >= depth) {
+      const leafStage = stage(stageCount - 1);
+      if (leafStage > 0) leaves.push({ x: tx, y: ty, dir: a, scale: leafStage, size: length * 0.55, variant: rnd() });
+      return;
+    }
+    const childCount = rnd() < 0.28 ? 3 : 2;
+    for (let i = 0; i < childCount; i++) {
+      const fraction = i / (childCount - 1);
+      const off = (fraction - 0.5) * 2 * sp.branchAngle;
+      const shortening = (childCount === 3 && i === 1) ? 0.78 : 1;
+      branch(tx, ty, a + off, length * sp.lengthRatio * shortening, tipWidth, generation + 1);
+    }
+  })(w / 2, h, 0, trunkLength, trunkLength * sp.slender, 0);
+
+  ctx.fillStyle = withered ? drain(sp.trunk, 0.72) : sp.trunk;
+  ctx.fill();
+  if (withered) return;
+
+  for (const lf of leaves) {
+    ctx.fillStyle = ctx.strokeStyle =
+      lf.variant < 0.45 ? sp.leaf : shift(sp.leaf, lf.variant < 0.72 ? 1.12 : 0.88);
+    if (sp.canopy === 'cluster') {
+      ctx.beginPath();
+      ctx.arc(lf.x, lf.y, lf.size * 0.5 * lf.scale * (0.78 + lf.variant * 0.44), 0, Math.PI * 2);
+      ctx.fill();
+    } else if (sp.canopy === 'needle') {
+      const len = lf.size * 0.62 * lf.scale;
+      ctx.lineWidth = Math.max(0.7, lf.size * 0.06);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i = -2; i <= 2; i++) {
+        const a = lf.dir + i * 0.42;
+        ctx.moveTo(lf.x, lf.y);
+        ctx.lineTo(lf.x + Math.sin(a) * len, lf.y - Math.cos(a) * len);
+      }
+      ctx.stroke();
+    } else if (sp.canopy === 'fan') {
+      const r = lf.size * 0.6 * lf.scale;
+      const start = lf.dir - Math.PI / 2 - 0.6;
+      ctx.beginPath();
+      ctx.moveTo(lf.x, lf.y);
+      ctx.arc(lf.x, lf.y, r, start, start + 1.2);
+      ctx.closePath();
+      ctx.fill();
+    } else { // trailing
+      const drop = lf.size * 1.25 * lf.scale;
+      ctx.lineWidth = Math.max(0.8, lf.size * 0.07);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i = -1; i <= 1; i++) {
+        const sx = lf.x + i * lf.size * 0.22;
+        ctx.moveTo(sx, lf.y);
+        ctx.quadraticCurveTo(sx + i * lf.size * 0.2, lf.y + drop * 0.6, sx + i * lf.size * 0.1, lf.y + drop);
+      }
+      ctx.stroke();
+    }
+  }
+}
+
+/* ---------------- canvas plumbing ---------------- */
+function fit(canvas) {
+  const r = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+    canvas.width = w * dpr; canvas.height = h * dpr;
+  }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+const token = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------------- the dial ---------------- */
+const SWEEP = Math.PI * 1.5;
+const START = -SWEEP / 2;            // clockwise from straight up
+const CANVAS_START = START - Math.PI / 2;
+const MIN_MIN = 5, MAX_MIN = 120, STEP = 5;
+
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+const state = {
+  minutes: 25,
+  phase: 'idle',       // idle | running | done | failed
+  growth: 1,
+  speciesIndex: 1,     // pine, the one on the icon
+  seed: 7,
+  garden: [],
+  startedAt: 0,
+  duration: 0,
+};
+
+const el = {
+  wrap: document.getElementById('dialwrap'),
+  dial: document.getElementById('dial'),
+  clock: document.getElementById('clock'),
+  sub: document.getElementById('sublabel'),
+  go: document.getElementById('go'),
+  quit: document.getElementById('quit'),
+  verdict: document.getElementById('verdict'),
+  plots: document.getElementById('plots'),
+  species: document.getElementById('species'),
+};
+
+function fraction() { return (state.minutes - MIN_MIN) / (MAX_MIN - MIN_MIN); }
+
+function drawDial(sway) {
+  const { ctx, w, h } = fit(el.dial);
+  const cx = w / 2, cy = h / 2;
+  const radius = Math.min(w, h) / 2 - 14;
+  const stroke = Math.max(8, radius * 0.11);
+
+  ctx.lineCap = 'round';
+  ctx.lineWidth = stroke;
+  ctx.strokeStyle = token('--paper-sunk');
+  ctx.beginPath(); ctx.arc(cx, cy, radius, CANVAS_START, CANVAS_START + SWEEP); ctx.stroke();
+
+  const shown = state.phase === 'running' || state.phase === 'done' || state.phase === 'failed'
+    ? state.growth : fraction();
+  if (shown > 0) {
+    ctx.strokeStyle = state.phase === 'failed' ? token('--stump') : token('--pine');
+    ctx.beginPath(); ctx.arc(cx, cy, radius, CANVAS_START, CANVAS_START + SWEEP * shown); ctx.stroke();
+  }
+
+  // The handle, only while the dial is live.
+  if (state.phase !== 'running') {
+    const a = CANVAS_START + SWEEP * fraction();
+    ctx.fillStyle = token('--paper-rise');
+    ctx.strokeStyle = token('--pine');
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx + Math.cos(a) * radius, cy + Math.sin(a) * radius, stroke * 0.42, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+  }
+
+  // Ticks, one per five minutes, inside the track as on the timer screen.
+  ctx.strokeStyle = token('--rule-firm');
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  const ticks = (MAX_MIN - MIN_MIN) / STEP;
+  for (let i = 0; i <= ticks; i++) {
+    const a = CANVAS_START + SWEEP * (i / ticks);
+    const outer = radius - stroke * 0.72;
+    const len = i % 6 === 0 ? stroke * 0.52 : stroke * 0.3;
+    ctx.moveTo(cx + Math.cos(a) * outer, cy + Math.sin(a) * outer);
+    ctx.lineTo(cx + Math.cos(a) * (outer - len), cy + Math.sin(a) * (outer - len));
+  }
+  ctx.stroke();
+
+  // The tree stands inside the ring. drawTree grows upward from the bottom
+  // edge of the box it is given, so the box is placed by where the ground
+  // should be rather than by its own top.
+  const bore = radius - stroke;
+  const boxW = bore * 1.5, boxH = boxW * 0.88;
+  const groundY = cy + bore * 0.80;
+  ctx.save();
+  ctx.translate(cx - boxW / 2, groundY - boxH);
+  drawTree(ctx, boxW, boxH, {
+    species: SPECIES[state.speciesIndex],
+    growth: state.growth,
+    withered: state.phase === 'failed',
+    seed: state.seed,
+    sway,
+    groundColor: token('--paper-sunk'),
+  });
+  ctx.restore();
+}
+
+function mmss(totalSeconds) {
+  const s = Math.max(0, Math.round(totalSeconds));
+  return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+
+function syncText() {
+  const sp = SPECIES[state.speciesIndex];
+  el.wrap.setAttribute('aria-valuenow', String(state.minutes));
+  el.wrap.setAttribute('aria-valuetext', state.minutes + '분');
+  if (state.phase === 'running') {
+    el.clock.textContent = mmss(state.minutes * 60 * (1 - state.growth));
+    el.sub.textContent = sp.ko + ' 심는 중';
+    el.go.textContent = '시작'; el.go.disabled = true; el.quit.disabled = false;
+    el.verdict.textContent = '지금 그만두면 아무것도 쌓이지 않습니다.';
+  } else if (state.phase === 'done') {
+    el.clock.textContent = '00:00';
+    el.sub.textContent = '완료';
+    el.go.textContent = '다시'; el.go.disabled = false; el.quit.disabled = true;
+    el.verdict.innerHTML = '<b>' + sp.ko + ' 한 그루가 정원에 남았습니다.</b> ' + state.minutes + '분이 누적 시간에 더해집니다.';
+  } else if (state.phase === 'failed') {
+    el.sub.textContent = '중단됨';
+    el.go.textContent = '다시'; el.go.disabled = false; el.quit.disabled = true;
+    el.verdict.innerHTML = '<b>시들었습니다.</b> 그루터기로 정원에 남고, 누적 시간은 0분입니다.';
+  } else {
+    el.clock.textContent = mmss(state.minutes * 60);
+    el.sub.textContent = '드래그해서 시간을 바꿔 보세요';
+    el.go.textContent = '시작'; el.go.disabled = false; el.quit.disabled = true;
+    el.verdict.textContent = state.minutes + '분을 끝내면 이 나무가 정원에 남습니다.';
+  }
+}
+
+/* The preview runs fast on purpose; the note under the dial says so. */
+function previewSeconds(minutes) { return Math.min(13, Math.max(5, minutes * 0.33)); }
+
+function tick(now) {
+  if (state.phase === 'running') {
+    state.growth = clamp01((now - state.startedAt) / (state.duration * 1000));
+    if (state.growth >= 1) { finish(true); }
+    else { syncText(); }
+  }
+  drawDial(reduced.matches || state.phase !== 'running' ? 0 : now / 900);
+  requestAnimationFrame(tick);
+}
+
+function plant(withered) {
+  state.garden.push({ species: state.speciesIndex, seed: state.seed, withered });
+  renderGarden();
+}
+
+function finish(completed) {
+  state.phase = completed ? 'done' : 'failed';
+  if (!completed) state.growth = Math.max(state.growth, 0.26); // a stump still has a trunk
+  plant(!completed);
+  syncText();
+}
+
+function renderGarden() {
+  el.plots.textContent = '';
+  if (!state.garden.length) {
+    const span = document.createElement('span');
+    span.className = 'empty';
+    span.textContent = '아직 비어 있습니다';
+    el.plots.append(span);
+    return;
+  }
+  for (const t of state.garden.slice(-14)) {
+    const c = document.createElement('canvas');
+    el.plots.append(c);
+    const { ctx, w, h } = fit(c);
+    drawTree(ctx, w, h, {
+      species: SPECIES[t.species], growth: 1, withered: t.withered, seed: t.seed,
+      groundColor: token('--paper-sunk'), depthLimit: 4,
+    });
+  }
+}
+
+/* ---------------- dial input ---------------- */
+function setFromPointer(ev) {
+  if (state.phase === 'running') return;
+  const r = el.dial.getBoundingClientRect();
+  const dx = ev.clientX - (r.left + r.width / 2);
+  const dy = ev.clientY - (r.top + r.height / 2);
+  let angle = Math.atan2(dx, -dy);   // clockwise from straight up, as the app measures it
+  // The gap at the bottom is centred on straight down, which is exactly where
+  // atan2 wraps, so each half of it falls on the side of the nearer end and a
+  // plain clamp lands on the right one.
+  if (angle < START) angle = START;
+  else if (angle > START + SWEEP) angle = START + SWEEP;
+  const f = clamp01((angle - START) / SWEEP);
+  const raw = MIN_MIN + f * (MAX_MIN - MIN_MIN);
+  const next = Math.min(MAX_MIN, Math.max(MIN_MIN, Math.round(raw / STEP) * STEP));
+  if (next !== state.minutes) { state.minutes = next; reset(); }
+}
+
+function reset() {
+  if (state.phase === 'done' || state.phase === 'failed') state.seed = (state.seed * 31 + 17) % 9973;
+  state.phase = 'idle';
+  state.growth = 1;
+  syncText();
+}
+
+let dragging = false;
+el.wrap.addEventListener('pointerdown', ev => {
+  if (state.phase === 'running') return;
+  dragging = true; el.wrap.setPointerCapture(ev.pointerId); setFromPointer(ev); ev.preventDefault();
+});
+el.wrap.addEventListener('pointermove', ev => { if (dragging) setFromPointer(ev); });
+el.wrap.addEventListener('pointerup', () => { dragging = false; });
+el.wrap.addEventListener('pointercancel', () => { dragging = false; });
+el.wrap.addEventListener('keydown', ev => {
+  if (state.phase === 'running') return;
+  const d = ev.key === 'ArrowRight' || ev.key === 'ArrowUp' ? STEP
+          : ev.key === 'ArrowLeft' || ev.key === 'ArrowDown' ? -STEP : 0;
+  if (!d) return;
+  ev.preventDefault();
+  state.minutes = Math.min(MAX_MIN, Math.max(MIN_MIN, state.minutes + d));
+  reset();
+});
+
+el.go.addEventListener('click', () => {
+  if (state.phase === 'done' || state.phase === 'failed') { reset(); return; }
+  state.seed = (state.seed * 31 + 17) % 9973;
+  state.duration = previewSeconds(state.minutes);
+  if (reduced.matches) {           // no animation: show the outcome at once
+    state.growth = 1; state.phase = 'running'; finish(true); return;
+  }
+  state.startedAt = performance.now();
+  state.growth = 0;
+  state.phase = 'running';
+  syncText();
+});
+el.quit.addEventListener('click', () => { if (state.phase === 'running') finish(false); });
+
+/* ---------------- species cards ---------------- */
+function hours(minutes) {
+  if (minutes === 0) return '처음부터';
+  return '누적 ' + (minutes / 60) + '시간';
+}
+SPECIES.forEach((sp, i) => {
+  const b = document.createElement('button');
+  b.className = 'sp';
+  b.type = 'button';
+  b.setAttribute('aria-pressed', String(i === state.speciesIndex));
+  const c = document.createElement('canvas');
+  const n = document.createElement('span'); n.className = 'n'; n.textContent = sp.ko;
+  const u = document.createElement('span'); u.className = 'u'; u.textContent = hours(sp.unlock);
+  b.append(c, n, u);
+  b.addEventListener('click', () => {
+    state.speciesIndex = i;
+    reset();
+    for (const other of el.species.children) other.setAttribute('aria-pressed', String(other === b));
+    el.wrap.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'center' });
+  });
+  el.species.append(b);
+});
+
+/* ---------------- static canvases ---------------- */
+function paintStatics() {
+  document.querySelectorAll('.sp canvas').forEach((c, i) => {
+    const { ctx, w, h } = fit(c);
+    drawTree(ctx, w, h, { species: SPECIES[i], growth: 1, seed: 101 + i * 13, groundColor: token('--paper-sunk') });
+  });
+  document.querySelectorAll('.state canvas').forEach(c => {
+    const { ctx, w, h } = fit(c);
+    const kind = c.dataset.state;
+    drawTree(ctx, w, h, {
+      species: SPECIES[1],
+      growth: kind === 'growing' ? 0.55 : kind === 'failed' ? 0.42 : 1,
+      withered: kind === 'failed',
+      seed: kind === 'growing' ? 44 : kind === 'failed' ? 91 : 23,
+      groundColor: token('--paper-sunk'),
+    });
+  });
+}
+
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { paintStatics(); renderGarden(); }, 120);
+});
+const scheme = window.matchMedia('(prefers-color-scheme: dark)');
+scheme.addEventListener('change', () => setTimeout(() => { paintStatics(); renderGarden(); }, 40));
+
+function boot() {
+  syncText();
+  paintStatics();
+  renderGarden();
+  requestAnimationFrame(tick);
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot); else boot();
+</script>
