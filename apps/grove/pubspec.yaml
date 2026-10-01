@@ -1,0 +1,28 @@
+name: grove
+description: >-
+  A focus timer that grows a tree while you work. Finish the session and the
+  tree is planted in your garden for good; walk away and it withers. Entirely
+  offline, no account, one-time purchase.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  intl: ^0.20.2
+  paper:
+    path: ../../packages/paper
+  # Resolves the app-support directory for FileStore. The only plugin here;
+  # everything else is pure Dart so it can be tested on any host.
+  path_provider: ^2.1.5
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher name. The Play listing title is set separately in Play
+         Console. -->
+    <string name="app_name">Ledger</string>
+</resources>

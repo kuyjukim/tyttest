@@ -1,0 +1,26 @@
+name: ledger
+description: >-
+  Envelope budgeting that works offline. Give every category an amount at the
+  start of the month, spend against it, and see what is actually left. No bank
+  connection, no subscription.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  intl: ^0.20.2
+  paper:
+    path: ../../packages/paper
+  path_provider: ^2.1.5
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

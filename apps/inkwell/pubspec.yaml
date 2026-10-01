@@ -1,0 +1,29 @@
+name: inkwell
+description: >-
+  An encrypted journal. Entries are sealed with a key derived from your
+  passphrase and never leave the device - there is no account, no sync and no
+  network code in the app at all.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  intl: ^0.20.2
+  paper:
+    path: ../../packages/paper
+  path_provider: ^2.1.5
+  # Pure Dart, so the crypto is the same code on every platform and is
+  # exercised directly by `flutter test` rather than through a channel.
+  pointycastle: ^4.0.0
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
