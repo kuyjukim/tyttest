@@ -13,6 +13,7 @@ export 'src/colors.dart';
 export 'src/motion.dart';
 export 'src/scope.dart';
 export 'src/store.dart';
+export 'src/strings.dart';
 export 'src/theme.dart';
 export 'src/tokens.dart';
 export 'src/typography.dart';

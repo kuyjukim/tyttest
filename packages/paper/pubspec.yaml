@@ -13,6 +13,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # From the SDK, so still no third-party dependency. Needed because a Korean
+  # locale without GlobalMaterialLocalizations leaves every stock Material
+  # affordance - selection menus, pickers, semantics labels - in English.
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_lints: ^5.0.0
