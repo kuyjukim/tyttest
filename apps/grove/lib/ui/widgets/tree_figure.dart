@@ -171,36 +171,56 @@ class TreePainter extends CustomPainter {
     final tipWidth = width * 0.68;
     _addTaperedSegment(wood, origin, tip, width, tipWidth, effectiveAngle);
 
-    // Foliage hangs on the outer two generations rather than the tips alone.
-    // One ring of clusters reads as dots on a stick; two rings overlap into
-    // something with a canopy.
-    if (generation >= _depth - 1) {
+    // Foliage hangs on the outer three generations, and the outermost
+    // carries a small cluster rather than a single leaf. One leaf per tip
+    // reads as dots on a stick however large the dots are; what makes a
+    // canopy is many overlapping shapes with no gaps between them.
+    if (generation >= _depth - 2) {
       final leafStage = _stage(_stageCount - 1, growth);
       if (leafStage > 0) {
-        foliage.add(
-          _Leaf(
-            position: tip,
-            direction: effectiveAngle,
-            scale: leafStage,
-            // The inner ring is smaller, so it fills the canopy instead of
-            // doubling its outline.
-            size: length * (generation >= _depth ? 0.72 : 0.56),
-            variant: random.nextDouble(),
-          ),
-        );
+        // Inner rings are smaller, so they fill the canopy instead of
+        // widening its outline.
+        final size =
+            length *
+            switch (_depth - generation) {
+              0 => 0.95,
+              1 => 0.70,
+              _ => 0.52,
+            };
+        final clump = generation >= _depth ? 3 : 1;
+        for (var i = 0; i < clump; i++) {
+          // Scattered around the tip rather than stacked on it; the offset
+          // is a fraction of the leaf, so it never detaches from its branch.
+          final spread = i == 0
+              ? Offset.zero
+              : Offset(
+                  (random.nextDouble() - 0.5) * size * 0.78,
+                  (random.nextDouble() - 0.5) * size * 0.78,
+                );
+          foliage.add(
+            _Leaf(
+              position: tip + spread,
+              direction: effectiveAngle,
+              scale: leafStage,
+              size: size * (i == 0 ? 1.0 : 0.72 + random.nextDouble() * 0.3),
+              variant: random.nextDouble(),
+            ),
+          );
+        }
       }
     }
     if (generation >= _depth) return;
 
-    // Three children normally, two often enough that the silhouette does not
-    // read as a regular lattice. A binary fork spends its whole budget on
-    // outline and leaves the inside of the tree empty.
-    final childCount = random.nextDouble() < 0.72 ? 3 : 2;
+    // Four children often, three otherwise. A binary fork spends its whole
+    // budget on outline and leaves the inside of the tree empty.
+    final childCount = random.nextDouble() < 0.40 ? 4 : 3;
     final spread = species.branchAngle;
     for (var i = 0; i < childCount; i++) {
       final fraction = childCount == 1 ? 0.5 : i / (childCount - 1);
       final offsetAngle = (fraction - 0.5) * 2 * spread;
-      final shortening = childCount == 3 && i == 1 ? 0.78 : 1.0;
+      // The inner children are shorter, so the fork reads as a crown rather
+      // than as a fan of equal spokes.
+      final shortening = (i > 0 && i < childCount - 1) ? 0.80 : 1.0;
       _branch(
         wood: wood,
         foliage: foliage,
@@ -239,66 +259,94 @@ class TreePainter extends CustomPainter {
       ..close();
   }
 
+  /// Paints the whole canopy in three draws instead of one per leaf.
+  ///
+  /// A full canopy is a few thousand shapes, and this repaints while a
+  /// session runs. Three filled or stroked paths cost about what three
+  /// shapes cost; three thousand canvas calls do not. Tone is what the
+  /// grouping is by, since there are only ever three of them.
   void _paintFoliage(Canvas canvas, List<_Leaf> leaves, Species species) {
-    final paint = Paint();
-    for (final leaf in leaves) {
-      // Two tones of the species colour, so a canopy has some depth without
-      // needing a gradient or a shadow.
-      paint.color = leaf.variant < 0.45
-          ? species.leafColor
-          : _shift(species.leafColor, leaf.variant < 0.72 ? 1.12 : 0.88);
+    final paths = <Path>[Path(), Path(), Path()];
+    final widths = <double>[0, 0, 0];
 
+    for (final leaf in leaves) {
+      final tone = leaf.variant < 0.45 ? 0 : (leaf.variant < 0.72 ? 1 : 2);
+      final path = paths[tone];
       switch (species.canopy) {
         case Canopy.cluster:
-          canvas.drawCircle(
-            leaf.position,
-            leaf.size * 0.72 * leaf.scale * (0.80 + leaf.variant * 0.46),
-            paint,
+          path.addOval(
+            Rect.fromCircle(
+              center: leaf.position,
+              radius:
+                  leaf.size * 0.72 * leaf.scale * (0.80 + leaf.variant * 0.46),
+            ),
           );
-        case Canopy.needle:
-          _drawNeedles(canvas, leaf, paint);
         case Canopy.fan:
-          _drawFan(canvas, leaf, paint);
+          _addFan(path, leaf);
+        case Canopy.needle:
+          _addNeedles(path, leaf);
+          widths[tone] = math.max(widths[tone], math.max(0.8, leaf.size * 0.075));
         case Canopy.trailing:
-          _drawTrailing(canvas, leaf, paint);
+          _addTrailing(path, leaf);
+          widths[tone] = math.max(widths[tone], math.max(0.8, leaf.size * 0.07));
       }
     }
-  }
 
-  void _drawNeedles(Canvas canvas, _Leaf leaf, Paint paint) {
-    final length = leaf.size * 0.82 * leaf.scale;
-    final stroke = Paint()
-      ..color = paint.color
-      ..strokeWidth = math.max(0.8, leaf.size * 0.075)
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    for (var i = -3; i <= 3; i++) {
-      final angle = leaf.direction + i * 0.34;
-      canvas.drawLine(
-        leaf.position,
-        leaf.position + Offset(math.sin(angle), -math.cos(angle)) * length,
-        stroke,
-      );
+    final stroked =
+        species.canopy == Canopy.needle || species.canopy == Canopy.trailing;
+    for (var tone = 0; tone < paths.length; tone++) {
+      // Two tones of the species colour either side of it, so a canopy has
+      // some depth without needing a gradient or a shadow.
+      final paint = Paint()
+        ..color = switch (tone) {
+          0 => species.leafColor,
+          1 => _shift(species.leafColor, 1.12),
+          _ => _shift(species.leafColor, 0.88),
+        };
+      if (stroked) {
+        paint
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = widths[tone]
+          ..strokeCap = StrokeCap.round;
+      }
+      canvas.drawPath(paths[tone], paint);
     }
   }
 
-  void _drawFan(Canvas canvas, _Leaf leaf, Paint paint) {
-    final radius = leaf.size * 0.82 * leaf.scale;
-    final rect = Rect.fromCircle(center: leaf.position, radius: radius);
-    // A ginkgo leaf is a fan: a wide arc notched at the stem.
-    canvas.drawArc(rect, leaf.direction - math.pi / 2 - 0.6, 1.2, true, paint);
+  /// Short needles fanned along the branch. A conifer.
+  void _addNeedles(Path path, _Leaf leaf) {
+    final length = leaf.size * 0.82 * leaf.scale;
+    for (var i = -3; i <= 3; i++) {
+      final angle = leaf.direction + i * 0.34;
+      path
+        ..moveTo(leaf.position.dx, leaf.position.dy)
+        ..lineTo(
+          leaf.position.dx + math.sin(angle) * length,
+          leaf.position.dy - math.cos(angle) * length,
+        );
+    }
   }
 
-  void _drawTrailing(Canvas canvas, _Leaf leaf, Paint paint) {
-    final stroke = Paint()
-      ..color = paint.color
-      ..strokeWidth = math.max(0.8, leaf.size * 0.07)
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
+  /// A ginkgo leaf: a wide arc notched at the stem.
+  void _addFan(Path path, _Leaf leaf) {
+    final radius = leaf.size * 0.82 * leaf.scale;
+    path
+      ..moveTo(leaf.position.dx, leaf.position.dy)
+      ..arcTo(
+        Rect.fromCircle(center: leaf.position, radius: radius),
+        leaf.direction - math.pi / 2 - 0.6,
+        1.2,
+        false,
+      )
+      ..close();
+  }
+
+  /// Long strands hanging below the branch. A willow.
+  void _addTrailing(Path path, _Leaf leaf) {
     final drop = leaf.size * 1.45 * leaf.scale;
     for (var i = -2; i <= 2; i++) {
       final start = leaf.position + Offset(i * leaf.size * 0.22, 0);
-      final path = Path()
+      path
         ..moveTo(start.dx, start.dy)
         ..quadraticBezierTo(
           start.dx + i * leaf.size * 0.2,
@@ -306,7 +354,6 @@ class TreePainter extends CustomPainter {
           start.dx + i * leaf.size * 0.1,
           start.dy + drop,
         );
-      canvas.drawPath(path, stroke);
     }
   }
 

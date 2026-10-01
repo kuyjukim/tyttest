@@ -192,7 +192,7 @@ button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
 /* ---------- rule / three states ---------- */
 .states { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); margin-top: 2rem; }
 .state { display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; }
-.state canvas { width: 100%; height: 150px; }
+.state canvas { width: 100%; height: 190px; }
 .state .cap { font-family: var(--data); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
 .state p { font-size: 0.9rem; color: var(--ink-soft); }
 
@@ -205,7 +205,7 @@ button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
 }
 .sp:hover { border-color: var(--ink-faint); }
 .sp[aria-pressed="true"] { border-color: var(--pine); background: var(--paper-rise); }
-.sp canvas { width: 100%; max-width: 86px; height: 92px; }
+.sp canvas { width: 100%; max-width: 92px; height: 112px; }
 .sp .n { font-size: 0.85rem; font-weight: 500; color: var(--ink); }
 .sp .u { font-family: var(--data); font-size: 0.68rem; color: var(--ink-faint); }
 
@@ -524,10 +524,11 @@ function drawTree(ctx, w, h, opts) {
   if (growth <= 0) return;
 
   const leaves = [];
-  // Shorter than the app's 0.34. The app gives its trees a padded box; the
-  // thumbnails here are 92px tall and the fuller canopy needs the headroom,
-  // or the crown is sliced flat against the top edge.
-  const trunkLength = h * 0.27;
+  // Shorter than the app's 0.34, because the app gives its trees a padded
+  // box and these draw to the edge of theirs. A dense canopy is a good deal
+  // wider and taller than the branch structure under it, and without the
+  // headroom the crown is sliced flat against the top edge.
+  const trunkLength = h * 0.22;
 
   ctx.beginPath();
   (function branch(ox, oy, angle, length, width, generation) {
@@ -552,27 +553,38 @@ function drawTree(ctx, w, h, opts) {
     ctx.lineTo(tx - nx * tipWidth / 2, ty - ny * tipWidth / 2);
     ctx.closePath();
 
-    // Foliage on the outer two generations, not the tips alone: one ring of
-    // clusters reads as dots on a stick, two rings overlap into a canopy.
-    if (generation >= depth - 1) {
+    // Foliage on the outer three generations, the outermost carrying a small
+    // clump rather than one leaf. A single leaf per tip reads as dots on a
+    // stick however large the dots are; a canopy is many overlapping shapes
+    // with no gaps left between them.
+    if (generation >= depth - 2) {
       const leafStage = stage(stageCount - 1);
       if (leafStage > 0) {
-        leaves.push({
-          x: tx, y: ty, dir: a, scale: leafStage,
-          // The inner ring is smaller, so it fills the canopy rather than
-          // doubling its outline.
-          size: length * (generation >= depth ? 0.72 : 0.56),
-          variant: rnd(),
-        });
+        const ring = depth - generation;
+        const size = length * (ring === 0 ? 0.95 : ring === 1 ? 0.70 : 0.52);
+        const clump = generation >= depth ? 3 : 1;
+        for (let i = 0; i < clump; i++) {
+          // Scattered around the tip, by a fraction of the leaf, so nothing
+          // ever detaches from the branch it grew on.
+          const dx = i === 0 ? 0 : (rnd() - 0.5) * size * 0.78;
+          const dy = i === 0 ? 0 : (rnd() - 0.5) * size * 0.78;
+          leaves.push({
+            x: tx + dx, y: ty + dy, dir: a, scale: leafStage,
+            size: size * (i === 0 ? 1 : 0.72 + rnd() * 0.3),
+            variant: rnd(),
+          });
+        }
       }
     }
     if (generation >= depth) return;
 
-    const childCount = rnd() < 0.72 ? 3 : 2;
+    const childCount = rnd() < 0.40 ? 4 : 3;
     for (let i = 0; i < childCount; i++) {
       const fraction = i / (childCount - 1);
       const off = (fraction - 0.5) * 2 * sp.branchAngle;
-      const shortening = (childCount === 3 && i === 1) ? 0.78 : 1;
+      // Inner children shorter, so a fork reads as a crown and not as a fan
+      // of equal spokes.
+      const shortening = (i > 0 && i < childCount - 1) ? 0.80 : 1;
       branch(tx, ty, a + off, length * sp.lengthRatio * shortening, tipWidth, generation + 1);
     }
   })(w / 2, h, 0, trunkLength, trunkLength * sp.slender, 0);
@@ -581,43 +593,56 @@ function drawTree(ctx, w, h, opts) {
   ctx.fill();
   if (withered) return;
 
+  // Three draws for the whole canopy instead of one per leaf: a full tree is
+  // a few thousand shapes, and the dial repaints every frame while a session
+  // runs. Grouped by tone, because there are only ever three of them.
+  const paths = [new Path2D(), new Path2D(), new Path2D()];
+  const widths = [0, 0, 0];
+
   for (const lf of leaves) {
-    ctx.fillStyle = ctx.strokeStyle =
-      lf.variant < 0.45 ? sp.leaf : shift(sp.leaf, lf.variant < 0.72 ? 1.12 : 0.88);
+    const tone = lf.variant < 0.45 ? 0 : (lf.variant < 0.72 ? 1 : 2);
+    const path = paths[tone];
     if (sp.canopy === 'cluster') {
-      ctx.beginPath();
-      ctx.arc(lf.x, lf.y, lf.size * 0.72 * lf.scale * (0.80 + lf.variant * 0.46), 0, Math.PI * 2);
-      ctx.fill();
+      path.moveTo(lf.x + lf.size * 0.72 * lf.scale * (0.80 + lf.variant * 0.46), lf.y);
+      path.arc(lf.x, lf.y, lf.size * 0.72 * lf.scale * (0.80 + lf.variant * 0.46), 0, Math.PI * 2);
     } else if (sp.canopy === 'needle') {
       const len = lf.size * 0.82 * lf.scale;
-      ctx.lineWidth = Math.max(0.8, lf.size * 0.075);
-      ctx.lineCap = 'round';
-      ctx.beginPath();
       for (let i = -3; i <= 3; i++) {
         const a = lf.dir + i * 0.34;
-        ctx.moveTo(lf.x, lf.y);
-        ctx.lineTo(lf.x + Math.sin(a) * len, lf.y - Math.cos(a) * len);
+        path.moveTo(lf.x, lf.y);
+        path.lineTo(lf.x + Math.sin(a) * len, lf.y - Math.cos(a) * len);
       }
-      ctx.stroke();
+      widths[tone] = Math.max(widths[tone], Math.max(0.8, lf.size * 0.075));
     } else if (sp.canopy === 'fan') {
       const r = lf.size * 0.82 * lf.scale;
       const start = lf.dir - Math.PI / 2 - 0.6;
-      ctx.beginPath();
-      ctx.moveTo(lf.x, lf.y);
-      ctx.arc(lf.x, lf.y, r, start, start + 1.2);
-      ctx.closePath();
-      ctx.fill();
+      path.moveTo(lf.x, lf.y);
+      path.arc(lf.x, lf.y, r, start, start + 1.2);
+      path.closePath();
     } else { // trailing
       const drop = lf.size * 1.45 * lf.scale;
-      ctx.lineWidth = Math.max(0.8, lf.size * 0.07);
-      ctx.lineCap = 'round';
-      ctx.beginPath();
       for (let i = -2; i <= 2; i++) {
         const sx = lf.x + i * lf.size * 0.22;
-        ctx.moveTo(sx, lf.y);
-        ctx.quadraticCurveTo(sx + i * lf.size * 0.2, lf.y + drop * 0.6, sx + i * lf.size * 0.1, lf.y + drop);
+        path.moveTo(sx, lf.y);
+        path.quadraticCurveTo(sx + i * lf.size * 0.2, lf.y + drop * 0.6, sx + i * lf.size * 0.1, lf.y + drop);
       }
-      ctx.stroke();
+      widths[tone] = Math.max(widths[tone], Math.max(0.8, lf.size * 0.07));
+    }
+  }
+
+  const stroked = sp.canopy === 'needle' || sp.canopy === 'trailing';
+  ctx.lineCap = 'round';
+  for (let tone = 0; tone < paths.length; tone++) {
+    // Two tones either side of the species colour, so the canopy has some
+    // depth without needing a gradient or a shadow.
+    const colour = tone === 0 ? sp.leaf : shift(sp.leaf, tone === 1 ? 1.12 : 0.88);
+    if (stroked) {
+      ctx.strokeStyle = colour;
+      ctx.lineWidth = widths[tone];
+      ctx.stroke(paths[tone]);
+    } else {
+      ctx.fillStyle = colour;
+      ctx.fill(paths[tone]);
     }
   }
 }
