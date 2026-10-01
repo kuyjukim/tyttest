@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grove/domain/day.dart';
 import 'package:grove/domain/session.dart';
 import 'package:grove/domain/species.dart';
 import 'package:grove/domain/stats.dart';
+import 'package:paper/paper.dart';
 
 FocusSession session({
   required Day day,

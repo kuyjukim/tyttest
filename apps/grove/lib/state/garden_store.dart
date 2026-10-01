@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:paper/paper.dart';
 
 import '../data/garden_repository.dart';
-import '../domain/day.dart';
 import '../domain/session.dart';
 import '../domain/settings.dart';
 import '../domain/species.dart';

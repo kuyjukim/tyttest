@@ -1,4 +1,5 @@
-import 'day.dart';
+import 'package:paper/paper.dart';
+
 import 'session.dart';
 
 /// A current/longest streak pair.

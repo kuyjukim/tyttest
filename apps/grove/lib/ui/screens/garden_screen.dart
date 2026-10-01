@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:paper/paper.dart';
 
-import '../../domain/day.dart';
 import '../../domain/session.dart';
 import '../../domain/stats.dart';
 import '../../state/garden_store.dart';

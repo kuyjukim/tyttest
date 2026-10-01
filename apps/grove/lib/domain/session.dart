@@ -1,4 +1,5 @@
-import 'day.dart';
+import 'package:paper/paper.dart';
+
 import 'species.dart';
 
 /// How a focus session ended.

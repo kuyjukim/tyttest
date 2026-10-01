@@ -10,6 +10,7 @@
 library;
 
 export 'src/colors.dart';
+export 'src/day.dart';
 export 'src/haptics.dart';
 export 'src/motion.dart';
 export 'src/scope.dart';

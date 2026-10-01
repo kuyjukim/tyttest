@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grove/data/garden_repository.dart';
 import 'package:grove/domain/active_session.dart';
-import 'package:grove/domain/day.dart';
 import 'package:grove/domain/session.dart';
 import 'package:grove/domain/settings.dart';
 import 'package:grove/domain/species.dart';
