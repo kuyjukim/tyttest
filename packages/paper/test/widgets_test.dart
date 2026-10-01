@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:paper/paper.dart';
 
@@ -275,6 +276,46 @@ void main() {
       );
       expect(Motion.time(ctx, Tempo.slow), Tempo.slow);
       expect(Motion.travel(ctx, 40), 40);
+    });
+  });
+
+  group('Buzz', () {
+    testWidgets('swallows a missing haptics channel instead of throwing',
+        (tester) async {
+      // No mock handler is installed, so the platform channel replies null,
+      // which MethodChannel turns into a MissingPluginException. A haptic
+      // must never be able to break the action it accompanies.
+      Buzz.select();
+      Buzz.tap();
+      Buzz.success();
+      Buzz.reject();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('does nothing at all when disabled', (tester) async {
+      var calls = 0;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'HapticFeedback.vibrate') calls++;
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+
+      Buzz.tap(enabled: false);
+      await tester.pump();
+      expect(calls, 0);
+
+      Buzz.tap();
+      await tester.pump();
+      expect(calls, 1);
     });
   });
 

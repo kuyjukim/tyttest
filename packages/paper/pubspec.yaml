@@ -11,6 +11,11 @@ environment:
   sdk: ^3.9.2
 
 dependencies:
+  # Cupertino widgets reach for this font family (SettingSwitch uses
+  # Switch.adaptive), and without the package in the graph every build warns
+  # that it cannot find the faces. Declared here rather than in each app
+  # because this package is what pulls Cupertino in.
+  cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
   # From the SDK, so still no third-party dependency. Needed because a Korean
