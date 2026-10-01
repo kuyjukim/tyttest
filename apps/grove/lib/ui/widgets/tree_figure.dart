@@ -101,9 +101,20 @@ class TreePainter extends CustomPainter {
     final wood = Path();
     final foliage = <_Leaf>[];
 
-    // The trunk is a fixed share of the available height so that a fully
-    // grown tree fills the box the same way at every size.
-    final trunkLength = size.height * 0.34;
+    // A share of the height, but never more than the box can hold. A dense
+    // canopy is much wider than the branches under it, and how much wider
+    // depends on the species, the seed and the recursion depth - so it is
+    // measured rather than guessed at, and the trunk is shortened until the
+    // whole tree fits. Picking a fraction that suits one species clips
+    // another.
+    final extent = _extent();
+    final trunkLength = math.min(
+      size.height * 0.34,
+      math.min(
+        size.width * 0.98 / math.max(extent.width, 0.001),
+        size.height * 0.98 / math.max(-extent.top, 0.001),
+      ),
+    );
     final trunkWidth = trunkLength * species.slenderness;
 
     _branch(
@@ -128,6 +139,52 @@ class TreePainter extends CustomPainter {
     }
   }
 
+  /// How far a grown tree of this exact shape reaches, in units of trunk
+  /// length, with the base of the trunk at the origin.
+  ///
+  /// Cached, because it depends only on the shape - species, seed, depth and
+  /// whether it withered - and not on growth or on the size it is drawn at,
+  /// while working it out means walking the whole structure.
+  static final Map<Object, Rect> _extents = <Object, Rect>{};
+
+  Rect _extent() {
+    final key = (figure.species, figure.seed, _depth, figure.withered);
+    final cached = _extents[key];
+    if (cached != null) return cached;
+
+    // Walked by the same code that draws it, at full growth and with a trunk
+    // one unit long. A tree part way through growing is strictly inside the
+    // grown one, since growth only ever shortens a branch.
+    final wood = Path();
+    final foliage = <_Leaf>[];
+    _branch(
+      wood: wood,
+      foliage: foliage,
+      random: math.Random(figure.seed),
+      origin: Offset.zero,
+      angle: 0,
+      length: 1,
+      width: figure.species.slenderness,
+      generation: 0,
+      growth: 1,
+    );
+    var rect = wood.getBounds();
+    for (final leaf in foliage) {
+      // 1.5 covers the largest reach of any canopy shape - a willow's
+      // strands, which hang further than a cluster is wide - and the slack
+      // on the others is margin rather than error.
+      rect = rect.expandToInclude(
+        Rect.fromCircle(center: leaf.position, radius: leaf.size * 1.5),
+      );
+    }
+
+    // Bounded, because a garden holds a tree per session and each has its own
+    // seed. Clearing wholesale costs one walk per visible tree afterwards,
+    // which is what the first frame does anyway.
+    if (_extents.length > 256) _extents.clear();
+    return _extents[key] = rect;
+  }
+
   /// Progress of stage [index], eased, in 0..1.
   double _stage(int index, double growth) {
     final span = 1 / _stageCount;
@@ -147,8 +204,14 @@ class TreePainter extends CustomPainter {
     required double growth,
   }) {
     final species = figure.species;
+    // No early return when this generation has not started yet. Its random
+    // numbers are spent either way, so the sequence - and so the shape - is
+    // the same at every growth. Returning here instead is what made a
+    // growing tree quietly reshuffle the branches it had already drawn, and
+    // it would also leave the measured extent describing a different tree
+    // from the one on screen.
     final extension = _stage(generation, growth);
-    if (extension <= 0) return;
+    final visible = extension > 0;
 
     // Each branch leans a little, deterministically, so no two trees from
     // different seeds look alike.
@@ -169,7 +232,9 @@ class TreePainter extends CustomPainter {
             grownLength;
 
     final tipWidth = width * 0.68;
-    _addTaperedSegment(wood, origin, tip, width, tipWidth, effectiveAngle);
+    if (visible) {
+      _addTaperedSegment(wood, origin, tip, width, tipWidth, effectiveAngle);
+    }
 
     // Foliage hangs on the outer three generations, and the outermost
     // carries a small cluster rather than a single leaf. One leaf per tip
@@ -177,7 +242,7 @@ class TreePainter extends CustomPainter {
     // canopy is many overlapping shapes with no gaps between them.
     if (generation >= _depth - 2) {
       final leafStage = _stage(_stageCount - 1, growth);
-      if (leafStage > 0) {
+      {
         // Inner rings are smaller, so they fill the canopy instead of
         // widening its outline.
         final size =
@@ -197,15 +262,18 @@ class TreePainter extends CustomPainter {
                   (random.nextDouble() - 0.5) * size * 0.78,
                   (random.nextDouble() - 0.5) * size * 0.78,
                 );
-          foliage.add(
-            _Leaf(
-              position: tip + spread,
-              direction: effectiveAngle,
-              scale: leafStage,
-              size: size * (i == 0 ? 1.0 : 0.72 + random.nextDouble() * 0.3),
-              variant: random.nextDouble(),
-            ),
+          final leaf = _Leaf(
+            position: tip + spread,
+            direction: effectiveAngle,
+            scale: leafStage,
+            size: size * (i == 0 ? 1.0 : 0.72 + random.nextDouble() * 0.3),
+            variant: random.nextDouble(),
           );
+          // Built, and its random numbers spent, even when the foliage stage
+          // has not started. Consuming the same numbers at every growth is
+          // what makes the shape identical throughout, which is what lets it
+          // be measured once and drawn at any stage.
+          if (leafStage > 0) foliage.add(leaf);
         }
       }
     }

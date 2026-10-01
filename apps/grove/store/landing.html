@@ -475,36 +475,34 @@ function mulberry32(a) {
 const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
 const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
-function drawTree(ctx, w, h, opts) {
-  const sp = opts.species;
-  const growth = clamp01(opts.growth);
-  const withered = !!opts.withered;
-  const sway = opts.sway || 0;
-  const depth = Math.min(sp.depth, opts.depthLimit || sp.depth);
+const EXTENTS = new Map();
+
+/* Walks the branch structure for one tree and returns the quads to fill and
+   the leaves to plant, around an origin of (0, 0) at the base of the trunk.
+   Nothing is drawn here, so the same walk can measure a tree before deciding
+   how big to draw it. */
+function buildTree(sp, seed, growth, trunkLength, withered, sway, depth) {
   const stageCount = depth + 2;
-  const rnd = mulberry32(opts.seed);
+  const rnd = mulberry32(seed);
   const stage = i => easeOutCubic(clamp01((growth - i * (1 / stageCount)) * stageCount));
-
-  if (opts.ground !== false) {
-    const gw = w * (0.26 + 0.1 * growth);
-    ctx.fillStyle = opts.groundColor;
-    ctx.beginPath();
-    ctx.ellipse(w / 2, h, gw / 2, h * 0.055 / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  if (growth <= 0) return;
-
+  const quads = [];
   const leaves = [];
-  // Shorter than the app's 0.34, because the app gives its trees a padded
-  // box and these draw to the edge of theirs. A dense canopy is a good deal
-  // wider and taller than the branch structure under it, and without the
-  // headroom the crown is sliced flat against the top edge.
-  const trunkLength = h * 0.22;
+  let minX = 0, maxX = 0, minY = 0, maxY = 0;
+  function note(x, y, r) {
+    if (x - r < minX) minX = x - r;
+    if (x + r > maxX) maxX = x + r;
+    if (y - r < minY) minY = y - r;
+    if (y + r > maxY) maxY = y + r;
+  }
 
-  ctx.beginPath();
   (function branch(ox, oy, angle, length, width, generation) {
+    // No early return when this generation has not started. Its random
+    // numbers are spent either way, so the sequence - and so the shape - is
+    // the same at every growth. Returning here instead would let a growing
+    // tree reshuffle branches it had already drawn, and would leave the
+    // measurement describing a different tree from the one on screen.
     const extension = stage(generation);
-    if (extension <= 0) return;
+    const visible = extension > 0;
 
     const lean = (rnd() - 0.5) * 0.18;
     const droop = withered ? 0.30 * generation : 0;
@@ -516,39 +514,49 @@ function drawTree(ctx, w, h, opts) {
     const ty = oy - Math.cos(a) * len;
     const tipWidth = width * 0.68;
 
-    // A filled, tapering quad. A stroked line of constant width looks like wire.
-    const nx = Math.cos(a), ny = Math.sin(a);
-    ctx.moveTo(ox - nx * width / 2, oy - ny * width / 2);
-    ctx.lineTo(ox + nx * width / 2, oy + ny * width / 2);
-    ctx.lineTo(tx + nx * tipWidth / 2, ty + ny * tipWidth / 2);
-    ctx.lineTo(tx - nx * tipWidth / 2, ty - ny * tipWidth / 2);
-    ctx.closePath();
+    if (visible) {
+      // A filled, tapering quad. A stroked line of constant width looks like
+      // wire, and tapering is most of what makes a branch look grown.
+      const nx = Math.cos(a), ny = Math.sin(a);
+      quads.push([
+        ox - nx * width / 2, oy - ny * width / 2,
+        ox + nx * width / 2, oy + ny * width / 2,
+        tx + nx * tipWidth / 2, ty + ny * tipWidth / 2,
+        tx - nx * tipWidth / 2, ty - ny * tipWidth / 2,
+      ]);
+      note(tx, ty, width);
+    }
 
-    // Foliage on the outer three generations, the outermost carrying a small
-    // clump rather than one leaf. A single leaf per tip reads as dots on a
-    // stick however large the dots are; a canopy is many overlapping shapes
-    // with no gaps left between them.
+    // Foliage on the outer three generations, the outermost carrying a clump
+    // rather than one leaf. A single leaf per tip reads as dots on a stick
+    // however large the dots are; a canopy is overlapping shapes with no
+    // gaps left between them.
     if (generation >= depth - 2) {
       const leafStage = stage(stageCount - 1);
-      if (leafStage > 0) {
-        const ring = depth - generation;
-        const size = length * (ring === 0 ? 0.95 : ring === 1 ? 0.70 : 0.52);
-        const clump = generation >= depth ? 3 : 1;
-        for (let i = 0; i < clump; i++) {
-          // Scattered around the tip, by a fraction of the leaf, so nothing
-          // ever detaches from the branch it grew on.
-          const dx = i === 0 ? 0 : (rnd() - 0.5) * size * 0.78;
-          const dy = i === 0 ? 0 : (rnd() - 0.5) * size * 0.78;
-          leaves.push({
-            x: tx + dx, y: ty + dy, dir: a, scale: leafStage,
-            size: size * (i === 0 ? 1 : 0.72 + rnd() * 0.3),
-            variant: rnd(),
-          });
-        }
+      const ring = depth - generation;
+      // Inner rings smaller, so they fill the canopy instead of widening it.
+      const size = length * (ring === 0 ? 0.95 : ring === 1 ? 0.70 : 0.52);
+      const clump = generation >= depth ? 3 : 1;
+      for (let i = 0; i < clump; i++) {
+        // Scattered around the tip by a fraction of the leaf, so nothing
+        // ever detaches from the branch it grew on.
+        const dx = i === 0 ? 0 : (rnd() - 0.5) * size * 0.78;
+        const dy = i === 0 ? 0 : (rnd() - 0.5) * size * 0.78;
+        const leaf = {
+          x: tx + dx, y: ty + dy, dir: a, scale: leafStage,
+          size: size * (i === 0 ? 1 : 0.72 + rnd() * 0.3),
+          variant: rnd(),
+        };
+        if (leafStage > 0) leaves.push(leaf);
+        // 1.5 covers the furthest reach of any canopy shape, a willow's
+        // strands; the slack on the rest is margin rather than error.
+        note(leaf.x, leaf.y, leaf.size * 1.5);
       }
     }
     if (generation >= depth) return;
 
+    // Four children often, three otherwise. A binary fork spends its whole
+    // budget on outline and leaves the inside of the tree empty.
     const childCount = rnd() < 0.40 ? 4 : 3;
     for (let i = 0; i < childCount; i++) {
       const fraction = i / (childCount - 1);
@@ -558,11 +566,66 @@ function drawTree(ctx, w, h, opts) {
       const shortening = (i > 0 && i < childCount - 1) ? 0.80 : 1;
       branch(tx, ty, a + off, length * sp.lengthRatio * shortening, tipWidth, generation + 1);
     }
-  })(w / 2, h, 0, trunkLength, trunkLength * sp.slender, 0);
+  })(0, 0, 0, trunkLength, trunkLength * sp.slender, 0);
 
+  return { quads, leaves, minX, maxX, minY, maxY };
+}
+
+/* A port of lib/ui/widgets/tree_figure.dart: same staged growth, same branch
+   recursion, same canopy shapes, same species constants, same fit. Only the
+   random source differs - Dart's Random and this one do not agree on a seed -
+   so a given seed draws a tree of the same character, not the same tree. */
+function drawTree(ctx, w, h, opts) {
+  const sp = opts.species;
+  const growth = clamp01(opts.growth);
+  const withered = !!opts.withered;
+  const sway = opts.sway || 0;
+  const depth = Math.min(sp.depth, opts.depthLimit || sp.depth);
+
+  if (opts.ground !== false) {
+    const gw = w * (0.26 + 0.1 * growth);
+    ctx.fillStyle = opts.groundColor;
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h, gw / 2, h * 0.055 / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (growth <= 0) return;
+
+  // How far a grown tree of this shape reaches, in units of trunk length.
+  // Measured rather than guessed at: a dense canopy is far wider than the
+  // branches under it, by an amount that depends on the species, the seed
+  // and the depth, so a fraction that suits one species clips the next.
+  // Cached, since it depends on none of growth, sway or the size drawn at.
+  const key = sp.key + ':' + opts.seed + ':' + depth + ':' + (withered ? 1 : 0);
+  let extent = EXTENTS.get(key);
+  if (!extent) {
+    const grown = buildTree(sp, opts.seed, 1, 1, withered, 0, depth);
+    extent = { width: grown.maxX - grown.minX, rise: -grown.minY };
+    if (EXTENTS.size > 256) EXTENTS.clear();
+    EXTENTS.set(key, extent);
+  }
+  const trunkLength = Math.min(
+    h * 0.34,
+    (w * 0.98) / Math.max(extent.width, 0.001),
+    (h * 0.98) / Math.max(extent.rise, 0.001),
+  );
+
+  const { quads, leaves } = buildTree(sp, opts.seed, growth, trunkLength, withered, sway, depth);
+
+  ctx.save();
+  ctx.translate(w / 2, h);
+
+  ctx.beginPath();
+  for (const q of quads) {
+    ctx.moveTo(q[0], q[1]);
+    ctx.lineTo(q[2], q[3]);
+    ctx.lineTo(q[4], q[5]);
+    ctx.lineTo(q[6], q[7]);
+    ctx.closePath();
+  }
   ctx.fillStyle = withered ? drain(sp.trunk, 0.72) : sp.trunk;
   ctx.fill();
-  if (withered) return;
+  if (withered) { ctx.restore(); return; }
 
   // Three draws for the whole canopy instead of one per leaf: a full tree is
   // a few thousand shapes, and the dial repaints every frame while a session
@@ -574,8 +637,9 @@ function drawTree(ctx, w, h, opts) {
     const tone = lf.variant < 0.45 ? 0 : (lf.variant < 0.72 ? 1 : 2);
     const path = paths[tone];
     if (sp.canopy === 'cluster') {
-      path.moveTo(lf.x + lf.size * 0.72 * lf.scale * (0.80 + lf.variant * 0.46), lf.y);
-      path.arc(lf.x, lf.y, lf.size * 0.72 * lf.scale * (0.80 + lf.variant * 0.46), 0, Math.PI * 2);
+      const r = lf.size * 0.72 * lf.scale * (0.80 + lf.variant * 0.46);
+      path.moveTo(lf.x + r, lf.y);
+      path.arc(lf.x, lf.y, r, 0, Math.PI * 2);
     } else if (sp.canopy === 'needle') {
       const len = lf.size * 0.82 * lf.scale;
       for (let i = -3; i <= 3; i++) {
@@ -586,11 +650,11 @@ function drawTree(ctx, w, h, opts) {
       widths[tone] = Math.max(widths[tone], Math.max(0.8, lf.size * 0.075));
     } else if (sp.canopy === 'fan') {
       const r = lf.size * 0.82 * lf.scale;
-      const start = lf.dir - Math.PI / 2 - 0.6;
+      const from = lf.dir - Math.PI / 2 - 0.6;
       path.moveTo(lf.x, lf.y);
-      path.arc(lf.x, lf.y, r, start, start + 1.2);
+      path.arc(lf.x, lf.y, r, from, from + 1.2);
       path.closePath();
-    } else { // trailing
+    } else {
       const drop = lf.size * 1.45 * lf.scale;
       for (let i = -2; i <= 2; i++) {
         const sx = lf.x + i * lf.size * 0.22;
@@ -616,6 +680,7 @@ function drawTree(ctx, w, h, opts) {
       ctx.fill(paths[tone]);
     }
   }
+  ctx.restore();
 }
 
 /* ---------------- canvas plumbing ---------------- */
