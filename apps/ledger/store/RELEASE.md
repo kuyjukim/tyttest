@@ -1,8 +1,8 @@
 # Ledger — release checklist
 
-What is done in this repository, and what still needs a Mac. Everything in
-the second list is unverified here, because this container has no Xcode and
-no device.
+What is done in this repository, and what is not. Nothing in the "needs a
+Mac" or "needs an Android SDK" lists has been verified here: this container
+has no Xcode, no Android SDK and no device of either kind.
 
 ## Done, and checked in
 
@@ -16,16 +16,34 @@ no device.
   properly.
 - **Privacy manifest.** `ios/Runner/PrivacyInfo.xcprivacy`, declaring no
   tracking, no collected data and no required-reason API use.
-- **Portrait only.** Supporting an orientation the layouts were never
-  designed for is how a reviewer finds a broken screen.
-- **Localised launcher name**, English and Korean, for both platforms.
+- **Portrait only**, on both platforms. Supporting an orientation the
+  layouts were never designed for is how a reviewer finds a broken screen.
+  Android 16 lifts the lock above 600dp by itself, which leaves a tablet the
+  same latitude the iPad build has.
+- **Localised launcher name**, English and Korean, for both platforms, plus
+  `locales_config.xml` so Android 13 and above list the app under per-app
+  language settings.
+- **Adaptive launcher icon** for Android, with a monochrome layer for
+  Android 13's themed icons. Without it every phone since Android 8.0 shows
+  the flat icon shrunk onto a white backplate.
+- **An upload-key slot** for Android. `android/key.properties` is read if it
+  is there and ignored by git; without it a release build is signed with the
+  debug key, and Gradle says so on every configure. See
+  `android/README.md`.
 - **Screenshots.** `flutter test tool/screenshots.dart --update-goldens`
   writes the 6.9" set to `store/screenshots/`.
-- **Listing copy**, English and Korean, in `store/listing-*.md`, with the
-  rest of the App Store Connect form in `store/metadata.md`. Check the field
-  limits with `tool/check_listing.py apps/ledger/store` from the repo root -
-  App Store Connect silently truncates an over-long field, or rejects the
-  upload after the binary has already gone up.
+- **Listing copy** for both stores, English and Korean:
+  `store/listing-*.md` for the App Store, `store/play-*.md` for Play, and
+  the rest of the App Store Connect form in `store/metadata.md`. Check the
+  field limits with `tool/check_listing.py apps/ledger/store` from the repo
+  root - a console silently truncates an over-long field, or rejects the
+  upload after the binary has already gone up. The Play files also list the
+  search terms they mean to rank for, and the same script checks each one
+  actually appears in the description: Play has no keyword field and indexes
+  the description itself.
+- **Play's feature graphic**, 1024×500 in both languages, written to
+  `store/feature-graphic-*.png` by the same golden run as the screenshots.
+  Play will not let you publish without one.
 
 ## Needs a Mac, and is not verified here
 
@@ -48,6 +66,35 @@ no device.
    pixels - but it is rendered by the test harness with a substitute font,
    not by iOS with the system face. Re-shoot on a device or simulator before
    uploading.
+
+## Needs an Android SDK, and is not verified here
+
+The Android side has never been compiled. This container's network policy
+denies `dl.google.com`, so the SDK cannot be installed and neither
+`flutter build apk` nor `flutter build appbundle` has ever run. Everything
+below the Flutter layer - the Gradle script, the manifest, the resources -
+is correct by inspection only.
+
+1. **Build it once.** `flutter build appbundle --release`. The first build
+   is where a Gradle mistake surfaces, and there are three new things here
+   for it to surface in: the signing block, `locales_config.xml` and the
+   adaptive icon.
+2. **Make an upload key** and write `android/key.properties`, per
+   `android/README.md`. Back the keystore up somewhere you will still have
+   it in five years; losing it means losing the ability to update the app.
+3. **Run it on a real phone.** Nothing here has executed on Android either.
+   The back gesture, the IME over the amount field, and the system font are
+   all first seen there.
+4. **Privacy policy URL.** Play requires one for every app, including one
+   that collects nothing, and will not accept "we collect nothing" as a
+   substitute. It has to be a page you host.
+5. **Data safety form.** Declare no collection and no sharing. It is
+   answered in the console, not in the repository, and a wrong answer here
+   is treated as a policy violation rather than a mistake.
+6. **Content rating questionnaire**, and the target audience declaration.
+7. **Screenshots.** Play takes the same PNGs as the App Store set, which are
+   within its size limits - but they carry the same caveat: rendered by the
+   test harness with a substitute font, not by a device.
 
 ## Pricing
 

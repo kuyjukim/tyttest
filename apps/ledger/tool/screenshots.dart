@@ -190,26 +190,202 @@ void main() {
   group('Korean', () {
     const ko = Locale('ko');
     testWidgets('budget', (t) => shoot(t, 'ko-1-budget', locale: ko));
-    testWidgets('spending',
-        (t) => shoot(t, 'ko-2-spending', locale: ko, after: tab('지출')));
-    testWidgets('reports',
-        (t) => shoot(t, 'ko-3-reports', locale: ko, after: tab('리포트')));
-    testWidgets('settings',
-        (t) => shoot(t, 'ko-4-settings', locale: ko, after: tab('설정')));
-    testWidgets('dark', (t) => shoot(
-          t,
-          'ko-5-dark',
-          locale: ko,
-          brightness: Brightness.dark,
-        ));
+    testWidgets(
+      'spending',
+      (t) => shoot(t, 'ko-2-spending', locale: ko, after: tab('지출')),
+    );
+    testWidgets(
+      'reports',
+      (t) => shoot(t, 'ko-3-reports', locale: ko, after: tab('리포트')),
+    );
+    testWidgets(
+      'settings',
+      (t) => shoot(t, 'ko-4-settings', locale: ko, after: tab('설정')),
+    );
+    testWidgets(
+      'dark',
+      (t) => shoot(t, 'ko-5-dark', locale: ko, brightness: Brightness.dark),
+    );
   });
 
   group('English', () {
     const en = Locale('en');
     testWidgets('budget', (t) => shoot(t, 'en-1-budget', locale: en));
-    testWidgets('spending',
-        (t) => shoot(t, 'en-2-spending', locale: en, after: tab('Spending')));
-    testWidgets('reports',
-        (t) => shoot(t, 'en-3-reports', locale: en, after: tab('Reports')));
+    testWidgets(
+      'spending',
+      (t) => shoot(t, 'en-2-spending', locale: en, after: tab('Spending')),
+    );
+    testWidgets(
+      'reports',
+      (t) => shoot(t, 'en-3-reports', locale: en, after: tab('Reports')),
+    );
   });
+
+  // Play asks for one 1024x500 banner per listing language, and will not let
+  // you publish without it. The App Store asks for nothing of the kind, which
+  // is why this sits apart from the screenshots above.
+  group('Play feature graphic', () {
+    Future<void> banner(
+      WidgetTester tester,
+      String name, {
+      required String title,
+      required String tagline,
+    }) async {
+      tester.view
+        ..physicalSize = kFeatureGraphic
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_FeatureGraphic(title: title, tagline: tagline));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(_FeatureGraphic),
+        matchesGoldenFile('../store/$name.png'),
+      );
+    }
+
+    testWidgets(
+      'korean',
+      (t) => banner(
+        t,
+        'feature-graphic-ko',
+        title: '봉투가계부',
+        tagline: '쓰기 전에 배정하는 가계부',
+      ),
+    );
+    testWidgets(
+      'english',
+      (t) => banner(
+        t,
+        'feature-graphic-en',
+        title: 'Ledger',
+        tagline: 'Budget before you spend',
+      ),
+    );
+  });
+}
+
+/// Play's banner size. Not a device size and not scaled: the console wants
+/// exactly these pixels.
+const Size kFeatureGraphic = Size(1024, 500);
+
+/// The banner. Deliberately almost empty - Play draws the app's own icon and
+/// name over this image in several places, and a busy graphic becomes an
+/// illegible one the moment it does.
+class _FeatureGraphic extends StatelessWidget {
+  const _FeatureGraphic({required this.title, required this.tagline});
+
+  final String title;
+  final String tagline;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: DecoratedBox(
+        // The icon's gradient, turned on the diagonal because this canvas is
+        // wide where the icon is square. The two colours are the ones in
+        // tool/make_icon.py.
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[Color(0xFFC46C31), Color(0xFF8C431E)],
+          ),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              CustomPaint(
+                size: const Size.square(360),
+                painter: _MarkPainter(),
+              ),
+              const SizedBox(width: 24),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 58,
+                      fontWeight: FontWeight.w600,
+                      height: 1.1,
+                      letterSpacing: -1,
+                      color: Color(0xFFFDF8F0),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    tagline,
+                    style: const TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 27,
+                      fontWeight: FontWeight.w400,
+                      height: 1.3,
+                      color: Color(0xCCFDF8F0),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The icon's mark, at the icon's own proportions.
+///
+/// Drawn here rather than loaded from the PNG so that the banner and the
+/// launcher icon cannot drift apart: the numbers below are the ones in
+/// tool/make_icon.py, in the same 1024-unit space.
+class _MarkPainter extends CustomPainter {
+  static const Rect _card = Rect.fromLTRB(196, 236, 828, 788);
+  static const double _cardRadius = 92;
+  static const double _barLeft = 272;
+  static const double _barRight = 752;
+  static const double _barHeight = 76;
+  static const List<double> _barTops = <double>[348, 474, 600];
+  static const List<double> _barFill = <double>[0.92, 0.58, 0.31];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 1024;
+
+    void fill(Rect rect, double radius, Color colour) => canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(radius * scale)),
+      Paint()..color = colour,
+    );
+
+    Rect at(double l, double t, double r, double b) =>
+        Rect.fromLTRB(l * scale, t * scale, r * scale, b * scale);
+
+    fill(
+      at(_card.left, _card.top, _card.right, _card.bottom),
+      _cardRadius,
+      const Color(0xFFF9F1E2),
+    );
+
+    for (final (index, top) in _barTops.indexed) {
+      final filled = _barLeft + (_barRight - _barLeft) * _barFill[index];
+      fill(
+        at(_barLeft, top, _barRight, top + _barHeight),
+        _barHeight / 2,
+        const Color(0xFFE8D8C2),
+      );
+      fill(
+        at(_barLeft, top, filled, top + _barHeight),
+        _barHeight / 2,
+        const Color(0xFFB45E2A),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_MarkPainter oldDelegate) => false;
 }

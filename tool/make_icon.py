@@ -8,6 +8,14 @@ PNG container) and integer span fills, so it runs anywhere Python does.
 Anti-aliasing comes from rendering at 4x and letting the downsample do the
 averaging, which is both simpler and better than trying to compute edge
 coverage analytically.
+
+Three layers come out of here. The master is the whole icon, flattened, for
+iOS and for the two Android releases below API 26 that minSdk 24 admits. The
+other two are the halves an Android adaptive icon is made of: a foreground
+drawn on transparency and sized to the safe zone, and a monochrome
+silhouette for Android 13's themed icons. The background half is not here
+at all - it is a flat gradient, which an
+Android shape drawable expresses exactly and at any size.
 """
 from __future__ import annotations
 
@@ -20,13 +28,23 @@ SUPERSAMPLE = 4
 SIZE = 1024
 W = H = SIZE * SUPERSAMPLE
 
+# An adaptive icon is a 108dp canvas of which only the central 66dp circle is
+# guaranteed to survive the launcher's mask. The card is a rectangle, so what
+# has to fit is its diagonal, not its width.
+SAFE_ZONE = 66 / 108
+
 
 class Canvas:
-    def __init__(self, width: int, height: int) -> None:
+    def __init__(self, width: int, height: int, *, alpha: bool = False) -> None:
         self.w = width
         self.h = height
         self.stride = width * 3
         self.buf = bytearray(self.stride * height)
+        # Transparent everywhere until something is drawn. Only the layers
+        # that need to be composited carry this; the flattened master does
+        # not, and an icon with an alpha channel is one of the things App
+        # Store Connect rejects after upload.
+        self.alpha = bytearray(width * height) if alpha else None
 
     def vertical_gradient(self, top: tuple[int, int, int],
                           bottom: tuple[int, int, int]) -> None:
@@ -38,15 +56,23 @@ class Canvas:
             self.buf[y * self.stride:(y + 1) * self.stride] = row
 
     def _span(self, y: int, x_from: float, x_to: float,
-              colour: tuple[int, int, int]) -> None:
+              colour: tuple[int, int, int] | None) -> None:
         if y < 0 or y >= self.h:
             return
         a = max(0, int(round(x_from)))
         b = min(self.w, int(round(x_to)))
         if b <= a:
             return
-        base = y * self.stride
-        self.buf[base + a * 3:base + b * 3] = bytes(colour) * (b - a)
+        # A null colour erases: how the bars are knocked out of the
+        # monochrome silhouette, which is tinted wherever it is opaque.
+        if colour is not None:
+            base = y * self.stride
+            self.buf[base + a * 3:base + b * 3] = bytes(colour) * (b - a)
+        if self.alpha is not None:
+            row = y * self.w
+            self.alpha[row + a:row + b] = bytes(
+                [0 if colour is None else 255]
+            ) * (b - a)
 
     def rounded_rect(self, x0: float, y0: float, x1: float, y1: float,
                      radius: float, colour: tuple[int, int, int]) -> None:
@@ -121,7 +147,14 @@ class Canvas:
         raw = bytearray()
         for y in range(self.h):
             raw.append(0)  # filter type 0, no prediction
-            raw += self.buf[y * self.stride:(y + 1) * self.stride]
+            if self.alpha is None:
+                raw += self.buf[y * self.stride:(y + 1) * self.stride]
+                continue
+            row = self.buf[y * self.stride:(y + 1) * self.stride]
+            band = self.alpha[y * self.w:(y + 1) * self.w]
+            for x in range(self.w):
+                raw += row[x * 3:x * 3 + 3]
+                raw.append(band[x])
 
         def chunk(tag: bytes, payload: bytes) -> bytes:
             return (
@@ -131,12 +164,89 @@ class Canvas:
                 + struct.pack('>I', zlib.crc32(tag + payload) & 0xFFFFFFFF)
             )
 
-        header = struct.pack('>IIBBBBB', self.w, self.h, 8, 2, 0, 0, 0)
+        colour_type = 2 if self.alpha is None else 6
+        header = struct.pack(
+            '>IIBBBBB', self.w, self.h, 8, colour_type, 0, 0, 0
+        )
         with open(path, 'wb') as handle:
             handle.write(b'\x89PNG\r\n\x1a\n')
             handle.write(chunk(b'IHDR', header))
             handle.write(chunk(b'IDAT', zlib.compress(bytes(raw), 9)))
             handle.write(chunk(b'IEND', b''))
+
+
+# The terracotta the background half is filled with, and the ink inside the
+# card. Shared with tool/make_app_icons.sh, which writes the same two values
+# into the Android gradient drawable.
+TERRACOTTA_TOP = (0xC4, 0x6C, 0x31)
+TERRACOTTA_BOTTOM = (0x8C, 0x43, 0x1E)
+
+CREAM = (0xF9, 0xF1, 0xE2)
+INK = (0xB4, 0x5E, 0x2A)
+FAINT = (0xE8, 0xD8, 0xC2)
+
+# The card and its three bars, in the master's 1024-unit coordinates.
+CARD = (196, 236, 828, 788)
+CARD_RADIUS = 92
+BAR_LEFT, BAR_RIGHT = 272, 752
+BAR_HEIGHT = 76
+BAR_TOPS = (348, 474, 600)
+BAR_FILL = (0.92, 0.58, 0.31)
+
+
+def _draw_mark(canvas: Canvas, scale: float, *,
+               card: tuple[int, int, int] | None = None,
+               track: tuple[int, int, int] | None = None,
+               fill: tuple[int, int, int] | None = None,
+               erase: frozenset[str] = frozenset()) -> None:
+    """Draws the mark, scaled about the centre of a square canvas.
+
+    Each of the three elements can be painted a colour, left out by passing
+    nothing, or named in `erase` to cut a hole in whatever is under it. The
+    monochrome layer is made entirely of holes, since the system tints the
+    layer wherever it is opaque and a painted colour would be thrown away.
+    """
+    unit = canvas.w / SIZE
+    centre = SIZE / 2
+
+    def at(v: float) -> float:
+        return (centre + (v - centre) * scale) * unit
+
+    if card is not None or 'card' in erase:
+        canvas.rounded_rect(
+            at(CARD[0]), at(CARD[1]), at(CARD[2]), at(CARD[3]),
+            CARD_RADIUS * scale * unit,
+            None if 'card' in erase else card,
+        )
+
+    radius = BAR_HEIGHT / 2
+    for top, fraction in zip(BAR_TOPS, BAR_FILL):
+        if track is not None or 'track' in erase:
+            canvas.rounded_rect(
+                at(BAR_LEFT), at(top), at(BAR_RIGHT), at(top + BAR_HEIGHT),
+                radius * scale * unit,
+                None if 'track' in erase else track,
+            )
+        if fill is not None or 'fill' in erase:
+            filled = BAR_LEFT + (BAR_RIGHT - BAR_LEFT) * fraction
+            canvas.rounded_rect(
+                at(BAR_LEFT), at(top), at(filled), at(top + BAR_HEIGHT),
+                radius * scale * unit,
+                None if 'fill' in erase else fill,
+            )
+
+
+def _adaptive_scale() -> float:
+    """How far the mark shrinks to clear an adaptive icon's mask.
+
+    The safe zone is a circle, so the card's diagonal is what has to fit
+    inside it - not its width, which would leave the corners to be shaved
+    off by a round mask.
+    """
+    width = CARD[2] - CARD[0]
+    height = CARD[3] - CARD[1]
+    diagonal = math.hypot(width, height)
+    return SAFE_ZONE * SIZE / diagonal
 
 
 def ledger_icon() -> Canvas:
@@ -153,43 +263,65 @@ def ledger_icon() -> Canvas:
     palette colours would be busier than a 60-pixel home-screen icon can
     carry.
     """
-    s = SUPERSAMPLE
     canvas = Canvas(W, H)
-    canvas.vertical_gradient((0xC4, 0x6C, 0x31), (0x8C, 0x43, 0x1E))
-
-    cream = (0xF9, 0xF1, 0xE2)
-    ink = (0xB4, 0x5E, 0x2A)
-    faint = (0xE8, 0xD8, 0xC2)
-
-    # The card.
-    canvas.rounded_rect(196 * s, 236 * s, 828 * s, 788 * s, 92 * s, cream)
-
-    # Three bars, each on its own track, filling less each time: the shape of
-    # a month going on.
-    left = 272
-    right = 752
-    track = right - left
-    bar_height = 76
-    radius = bar_height / 2
-    tops = (348, 474, 600)
-    fractions = (0.92, 0.58, 0.31)
-
-    for top, fraction in zip(tops, fractions):
-        canvas.rounded_rect(
-            left * s, top * s, right * s, (top + bar_height) * s,
-            radius * s, faint,
-        )
-        filled = left + track * fraction
-        canvas.rounded_rect(
-            left * s, top * s, filled * s, (top + bar_height) * s,
-            radius * s, ink,
-        )
-
+    canvas.vertical_gradient(TERRACOTTA_TOP, TERRACOTTA_BOTTOM)
+    _draw_mark(canvas, 1.0, card=CREAM, track=FAINT, fill=INK)
     return canvas
 
 
+def ledger_foreground() -> Canvas:
+    """The card alone, on transparency, sized to the adaptive safe zone.
+
+    It is drawn smaller than the master's card looks, and that is correct:
+    the launcher mask crops the 108dp canvas down to something near 72dp, so
+    a mark that filled this canvas the way it fills the master would have its
+    edges cut off on exactly the devices the layer exists for.
+    """
+    canvas = Canvas(W, H, alpha=True)
+    _draw_mark(canvas, _adaptive_scale(), card=CREAM, track=FAINT, fill=INK)
+    return canvas
+
+
+def ledger_monochrome() -> Canvas:
+    """The silhouette Android 13 tints for a themed home screen.
+
+    The system paints one colour wherever this layer is opaque, so the mark
+    has to be made of holes rather than of colours: a solid card with the
+    *filled* part of each bar cut out of it. Cutting the whole track instead
+    would leave three holes of equal length, which is a list icon and not
+    this one.
+    """
+    canvas = Canvas(W, H, alpha=True)
+    _draw_mark(
+        canvas,
+        _adaptive_scale(),
+        card=(0, 0, 0),
+        erase=frozenset({'fill'}),
+    )
+    return canvas
+
+
+LAYERS = {
+    'master': ledger_icon,
+    'foreground': ledger_foreground,
+    'monochrome': ledger_monochrome,
+}
+
+
+def main(argv: list[str]) -> int:
+    out = argv[1] if len(argv) > 1 else 'icon-master.png'
+    layer = argv[2] if len(argv) > 2 else 'master'
+    if layer not in LAYERS:
+        print(
+            f'unknown layer {layer!r}; expected one of '
+            + ', '.join(sorted(LAYERS)),
+            file=sys.stderr,
+        )
+        return 2
+    LAYERS[layer]().write_png(out)
+    print(f'wrote {out} at {W}x{H} ({layer})')
+    return 0
+
+
 if __name__ == '__main__':
-    out = sys.argv[1] if len(sys.argv) > 1 else 'icon-master.png'
-    icon = ledger_icon()
-    icon.write_png(out)
-    print(f'wrote {out} at {W}x{H}')
+    raise SystemExit(main(sys.argv))

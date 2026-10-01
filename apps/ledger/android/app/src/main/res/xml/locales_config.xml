@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The languages the app is translated into, so that Android 13 and above
+     list it under per-app language settings. The iOS counterpart is
+     CFBundleLocalizations in Info.plist; both have to be kept in step with
+     the delegates in lib/ui/strings.dart. -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="ko" />
+</locale-config>

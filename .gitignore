@@ -17,3 +17,9 @@ pubspec.lock
 # Five megabytes of subsetted Noto Sans KR that the shipping app never uses:
 # derived, reproducible, and not worth carrying in the history.
 apps/ledger/web/fonts/
+
+# Android upload keys. The keystore itself should live outside the repository
+# entirely; these are here so that a stray copy cannot be committed by accident.
+key.properties
+*.jks
+*.keystore
