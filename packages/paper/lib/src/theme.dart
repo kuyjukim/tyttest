@@ -55,7 +55,12 @@ abstract final class PaperTheme {
       scaffoldBackgroundColor: c.surface,
       canvasColor: c.surface,
       extensions: <ThemeExtension<Object?>>[c, type],
-      splashFactory: InkSparkle.splashFactory,
+      // InkRipple, not InkSparkle. InkSparkle is Android 12's splash and it
+      // loads a fragment shader asset at first touch - an asset dependency,
+      // and a platform-specific flourish, in a design system that is
+      // deliberately neither. A plain ripple is consistent on both platforms
+      // and costs nothing to load.
+      splashFactory: InkRipple.splashFactory,
       visualDensity: VisualDensity.standard,
       textTheme: TextTheme(
         displayLarge: type.display,

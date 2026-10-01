@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../motion.dart';
@@ -77,7 +79,10 @@ class StatTile extends StatelessWidget {
 class Bar {
   const Bar({required this.label, required this.value, this.highlight = false});
 
-  /// Axis label under the bar. Kept to one or two characters where possible.
+  /// Axis label under the bar. Kept to one or two characters where possible;
+  /// [BarChart] thins the strip when the columns are narrower than the text,
+  /// so a long label costs its neighbours their labels rather than overlapping
+  /// them. Every bar keeps its label in the semantics tree either way.
   final String label;
 
   /// Magnitude, in whatever unit the caller's [BarChart.formatValue] speaks.
@@ -121,14 +126,61 @@ class _BarChartState extends State<BarChart> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     if (widget.bars.isEmpty) return SizedBox(height: widget.height);
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _build(context, _labelStride(context, constraints.maxWidth)),
+    );
+  }
 
-    final peak = widget.bars.map((b) => b.value).reduce((a, b) => a > b ? a : b);
+  /// How many columns apart the axis labels stand.
+  ///
+  /// A week of bars has room for all seven. A month of daily bars on a phone
+  /// gives each column about thirteen logical pixels - narrower than the two
+  /// digits of "18" - and a strip that labels all of them wraps each number
+  /// onto two lines and clips the second. So the strip labels every nth
+  /// column instead, with n the smallest stride that leaves the widest label
+  /// clear of its neighbour.
+  int _labelStride(BuildContext context, double width) {
+    final columns = widget.bars.length;
+    if (columns == 0 || !width.isFinite || width <= 0) return 1;
+
+    // Every label, not the one with the most characters: "11" is narrower
+    // than "8" in some faces, and the labels are not always digits.
+    final style = context.type.caption;
+    final direction = Directionality.of(context);
+    var widest = 0.0;
+    for (final bar in widget.bars) {
+      final painter = TextPainter(
+        text: TextSpan(text: bar.label, style: style),
+        textDirection: direction,
+        maxLines: 1,
+      )..layout();
+      widest = math.max(widest, painter.width);
+      painter.dispose();
+    }
+
+    const breathing = 6.0;
+    final column = width / columns;
+    if (widest + breathing <= column) return 1;
+    return ((widest + breathing) / column).ceil();
+  }
+
+  Widget _build(BuildContext context, int stride) {
+    final colors = context.colors;
+
+    final peak = widget.bars
+        .map((b) => b.value)
+        .reduce((a, b) => a > b ? a : b);
     final peakIndex = widget.bars.indexWhere((b) => b.value == peak);
     // An all-zero week must not divide by zero, and should render as a row of
     // empty tracks rather than as full-height bars.
     final scale = peak <= 0 ? 0.0 : 1 / peak;
+
+    // Count the stride from the highlighted bar rather than from the left
+    // edge, so that today is always one of the days named. Dart's modulo is
+    // never negative, so bars before the anchor fall where you would expect.
+    final anchor = math.max(0, widget.bars.indexWhere((b) => b.highlight));
 
     return SizedBox(
       height: widget.height + _labelStrip,
@@ -171,18 +223,29 @@ class _BarChartState extends State<BarChart> {
                           ),
                           SizedBox(
                             height: _labelStrip,
-                            child: Center(
-                              child: Text(
-                                bar.label,
-                                style: context.type.caption.copyWith(
-                                  color: bar.highlight
-                                      ? colors.ink
-                                      : colors.inkMuted,
-                                  fontWeight:
-                                      bar.highlight ? FontWeight.w600 : null,
-                                ),
-                              ),
-                            ),
+                            child: (index - anchor) % stride != 0
+                                ? null
+                                // A label may be wider than the column it
+                                // belongs to - "10" is, on a month of days.
+                                // The stride has already emptied the columns
+                                // on either side, so let it spill into them
+                                // rather than shear the last digit off.
+                                : OverflowBox(
+                                    maxWidth: double.infinity,
+                                    child: Text(
+                                      bar.label,
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      style: context.type.caption.copyWith(
+                                        color: bar.highlight
+                                            ? colors.ink
+                                            : colors.inkMuted,
+                                        fontWeight: bar.highlight
+                                            ? FontWeight.w600
+                                            : null,
+                                      ),
+                                    ),
+                                  ),
                           ),
                         ],
                       ),
@@ -242,7 +305,9 @@ class _BarColumn extends StatelessWidget {
                 // A bar with a real but tiny value still deserves a visible
                 // sliver; only a true zero collapses to nothing.
                 final raw = constraints.maxHeight * fraction;
-                final height = bar.value <= 0 ? 0.0 : raw.clamp(3.0, constraints.maxHeight);
+                final height = bar.value <= 0
+                    ? 0.0
+                    : raw.clamp(3.0, constraints.maxHeight);
                 return Align(
                   alignment: Alignment.bottomCenter,
                   child: AnimatedContainer(

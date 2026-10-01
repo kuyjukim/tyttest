@@ -8,7 +8,10 @@
 //
 // It is deliberately a separate `-t` target rather than a debug flag in
 // `main.dart`: demo data must not be reachable from the shipped binary.
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:paper/paper.dart';
 
 import 'app.dart';
@@ -36,7 +39,57 @@ Future<void> main() async {
   // `?lang=en` renders the English set from the same build.
   final language = Uri.base.queryParameters['lang'] == 'en' ? 'en' : 'ko';
 
-  runApp(LedgerApp(store: store, locale: Locale(language)));
+  final fontFamily = await _loadFont();
+
+  runApp(
+    LedgerApp(store: store, locale: Locale(language), fontFamily: fontFamily),
+  );
+}
+
+/// The browser has no Korean system face to lend the app, and CanvasKit's
+/// own answer - fetching Noto subsets from fonts.gstatic.com as it meets
+/// glyphs it cannot draw - fails behind any strict content security policy
+/// and leaves the interface blank. So the demo carries its own face, built
+/// by `tool/make_demo_fonts.py` into `web/fonts/`.
+///
+/// Returns null if the fonts cannot be fetched. That is not fatal: the app
+/// then renders in whatever CanvasKit resolves, which is the behaviour we
+/// would have had anyway, and a demo that is wrongly set beats one that
+/// never starts.
+Future<String?> _loadFont() async {
+  const family = 'Noto Sans KR';
+  try {
+    final loader = FontLoader(family);
+    // One file per weight. FontLoader registers them under a single family
+    // and Skia matches on each face's own OS/2 weight, so the type scale
+    // keeps working without naming the files.
+    for (final weight in const [400, 600]) {
+      loader.addFont(_fetchBytes('fonts/NotoSansKR-$weight.ttf'));
+    }
+    await loader.load();
+    return family;
+  } catch (error) {
+    debugPrint('demo: falling back to the default font ($error)');
+    return null;
+  }
+}
+
+Future<ByteData> _fetchBytes(String url) async {
+  final response = await _fetch(url).toDart;
+  if (!response.ok) {
+    throw StateError('GET $url -> ${response.status}');
+  }
+  final buffer = await response.arrayBuffer().toDart;
+  return ByteData.view(buffer.toDart);
+}
+
+@JS('fetch')
+external JSPromise<_Response> _fetch(String url);
+
+extension type _Response._(JSObject _) implements JSObject {
+  external bool get ok;
+  external int get status;
+  external JSPromise<JSArrayBuffer> arrayBuffer();
 }
 
 var _counter = 0;
