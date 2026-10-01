@@ -30,6 +30,21 @@ machine:
 flutter test --update-goldens tool/screenshots.dart
 ```
 
+## iOS resources
+
+`PrivacyInfo.xcprivacy` and the localised `InfoPlist.strings` have to be
+listed in `project.pbxproj` or Xcode does not copy them into the bundle, and
+an app without a privacy manifest is rejected at upload. `flutter create`
+does not know about them, so:
+
+```sh
+gem install xcodeproj
+ruby tool/wire_ios_resources.rb    # idempotent
+```
+
+The iOS job in CI builds the bundle and checks inside it, so a regression
+here fails a build rather than an App Store submission.
+
 ## Browser demo
 
 `lib/demo_main.dart` is the same app over a pinned clock and a month of seeded

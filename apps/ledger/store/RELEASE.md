@@ -56,12 +56,18 @@ has no Xcode, no Android SDK and no device of either kind.
 1. **Bundle identifier.** Currently `com.tyttest.ledger` in
    `ios/Runner.xcodeproj` and `android/app/build.gradle.kts`. Change it
    before the first upload if you own a domain - it cannot be changed after.
-2. **Add two files to the Xcode target.** `PrivacyInfo.xcprivacy` and the
-   `en.lproj` / `ko.lproj` `InfoPlist.strings` exist on disk but are not
-   referenced by `project.pbxproj`. Drag them into the Runner target in
-   Xcode (the strings files into Copy Bundle Resources). They were not added
-   by hand here because editing `project.pbxproj` blind, with no way to open
-   the project and check, risks corrupting it.
+2. ~~**Add two files to the Xcode target.**~~ **Done, and verified.**
+   `PrivacyInfo.xcprivacy` and the `en.lproj` / `ko.lproj`
+   `InfoPlist.strings` existed on disk but were not referenced by
+   `project.pbxproj`, so none of them were copied into the built app - which
+   is a rejected upload, after the binary has gone up. CI now builds the real
+   bundle on a macOS runner and looks inside it, which is how this was
+   caught; before that there was no way to see it from here.
+   `tool/wire_ios_resources.rb` adds them with the `xcodeproj` gem rather
+   than by hand, because `project.pbxproj` is a graph of hex identities and a
+   corrupted one is not obvious until an Xcode you do not have refuses to
+   open it. It is idempotent; run it again after any `flutter create`-style
+   regeneration.
 3. **Signing**: team, provisioning profile, and a matching App Store Connect
    record.
 4. **Run it on a real device.** Nothing in this app has ever executed on
