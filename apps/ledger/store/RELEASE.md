@@ -117,6 +117,16 @@ whose home screen is blank. `tool/check.sh` runs it.
    applied for. Organisation accounts are exempt. Check the current rule in
    the console: this one moves, and it is weeks of calendar time either way.
 
+## Before any of this: who else is already there
+
+`store/competition.md`. The assumption this app was built on - that no
+established Korean app does prospective, envelope-style budgeting - has
+three named counterexamples and has never been verified from here, because
+every store host is blocked by this environment's network policy. That file
+records what is believed, how strongly, and the five checks that settle it.
+Two of them decide what the listing should lead with, so they are worth
+doing before the copy is final rather than after.
+
 ## Pricing
 
 The paid Finance chart's incumbents sit at $2.99–$5.99, and Korean
