@@ -53,6 +53,29 @@ Two platform notes worth knowing before that run:
   is a fixed point a few minutes away rather than a wall-clock time. That is
   also why no tzdata is loaded and no platform zone is looked up.
 
+## The public page
+
+`store/landing.html` is the marketing page, and it carries the privacy policy
+the App Store submission needs a URL for. It is written as an artifact body -
+no doctype, no `<head>` - so it cannot be served as-is. `tool/build_site.sh`
+wraps it, copies the icon and four screenshots alongside, and writes `docs/`
+at the repository root:
+
+```sh
+tool/build_site.sh                      # writes docs/
+python3 -m http.server -d docs 8000     # look at it
+```
+
+GitHub Pages is pointed at `docs/` once, by hand, under
+Settings -> Pages -> Source: Deploy from a branch. Re-run the script and
+commit `docs/` after any change to the page or the screenshots; nothing
+builds it automatically.
+
+The trees on that page are the real ones: `lib/ui/widgets/tree_figure.dart`
+ported to canvas, same staged growth and same species table. Only the random
+source differs, so a seed draws a tree of the same character rather than the
+same tree.
+
 ## Store assets
 
 `store/` holds what App Store Connect asks for: the listing copy in both
