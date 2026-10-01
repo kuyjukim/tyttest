@@ -11,6 +11,7 @@ class GroveSettings {
     this.dailyGoal = const Duration(minutes: 90),
     this.preferredSpecies = Species.sprout,
     this.haptics = true,
+    this.notify = true,
   });
 
   factory GroveSettings.fromJson(Map<String, Object?> json) => GroveSettings(
@@ -29,6 +30,7 @@ class GroveSettings {
     preferredSpecies:
         Species.byName(json['species'] as String? ?? '') ?? Species.sprout,
     haptics: json['haptics'] as bool? ?? true,
+    notify: json['notify'] as bool? ?? true,
   );
 
   /// Shortest and longest session the dial offers.
@@ -52,6 +54,15 @@ class GroveSettings {
   final Species preferredSpecies;
   final bool haptics;
 
+  /// When true, the app posts a notification at the end of a session it is
+  /// not on screen for.
+  ///
+  /// Defaults on, because a timer nobody is watching is the normal way to
+  /// use this app: the whole point of planting a tree is to put the phone
+  /// down. Off is still worth offering - the OS permission can be refused,
+  /// and some people run this next to a clock they can see.
+  final bool notify;
+
   GroveSettings copyWith({
     ThemeMode? themeMode,
     bool? strict,
@@ -59,6 +70,7 @@ class GroveSettings {
     Duration? dailyGoal,
     Species? preferredSpecies,
     bool? haptics,
+    bool? notify,
   }) => GroveSettings(
     themeMode: themeMode ?? this.themeMode,
     strict: strict ?? this.strict,
@@ -66,6 +78,7 @@ class GroveSettings {
     dailyGoal: dailyGoal ?? this.dailyGoal,
     preferredSpecies: preferredSpecies ?? this.preferredSpecies,
     haptics: haptics ?? this.haptics,
+    notify: notify ?? this.notify,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -75,6 +88,7 @@ class GroveSettings {
     'dailyGoalMinutes': dailyGoal.inMinutes,
     'species': preferredSpecies.name,
     'haptics': haptics,
+    'notify': notify,
   };
 
   /// Reads a persisted minute count, defending against a hand-edited or

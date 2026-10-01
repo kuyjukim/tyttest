@@ -48,6 +48,13 @@ class SettingsScreen extends StatelessWidget {
         ),
         const Hairline(),
         SettingSwitch(
+          title: strings.notifications,
+          subtitle: strings.notificationsBody,
+          value: settings.notify,
+          onChanged: store.setNotify,
+        ),
+        const Hairline(),
+        SettingSwitch(
           title: strings.haptics,
           subtitle: strings.hapticsBody,
           value: settings.haptics,

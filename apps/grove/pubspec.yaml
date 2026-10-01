@@ -12,12 +12,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Posts the one notification this app sends: the end of a session the user
+  # is not watching. Reached only through SessionAlarm, whose default
+  # implementation does nothing, so the test suite needs no platform channel.
+  flutter_local_notifications: ^20.1.0
   intl: ^0.20.2
   paper:
     path: ../../packages/paper
-  # Resolves the app-support directory for FileStore. The only plugin here;
-  # everything else is pure Dart so it can be tested on any host.
+  # Resolves the app-support directory for FileStore.
   path_provider: ^2.1.5
+  # Used for exactly one thing: naming the alarm's instant in UTC, so that no
+  # DST transition can move it. That needs no tzdata download.
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_lints: ^5.0.0

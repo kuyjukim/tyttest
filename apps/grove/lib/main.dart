@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'app.dart';
 import 'data/garden_repository.dart';
+import 'platform/notification_alarm.dart';
 import 'state/garden_store.dart';
 import 'state/session_controller.dart';
 
@@ -20,6 +21,10 @@ Future<void> main() async {
     repository: GardenRepository(await _openStore()),
     controller: SessionController(clock: DateTime.now, idFactory: _newId),
     clock: DateTime.now,
+    // The one place the real notification plugin is named. Everywhere else -
+    // every test, the screenshot harness - gets the silent default, which is
+    // why none of them needs a platform channel.
+    alarm: NotificationAlarm(),
   );
 
   runApp(GroveApp(store: store));

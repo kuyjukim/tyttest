@@ -282,7 +282,7 @@ void main() {
         planned: const Duration(minutes: 25),
       );
 
-      store.onBackgrounded();
+      await store.onBackgrounded();
       clock.advance(const Duration(minutes: 3));
       await store.onForegrounded();
 

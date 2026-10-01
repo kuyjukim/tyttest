@@ -15,11 +15,12 @@
 	<key>NSPrivacyCollectedDataTypes</key>
 	<array/>
 	<!--
-	  Required-reason APIs. Ledger reads and writes files in its own
+	  Required-reason APIs. Grove reads and writes files in its own
 	  application-support directory and never touches file timestamps, disk
 	  space, UserDefaults, system boot time or active keyboards, so this list
-	  is empty. The Flutter engine and path_provider ship their own manifests
-	  for anything they use.
+	  is empty. The Flutter engine, path_provider and
+	  flutter_local_notifications - which does use UserDefaults - each ship
+	  their own manifest for what they use.
 	-->
 	<key>NSPrivacyAccessedAPITypes</key>
 	<array/>

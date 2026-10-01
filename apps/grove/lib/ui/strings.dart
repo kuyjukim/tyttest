@@ -76,6 +76,14 @@ abstract class S {
   String get dailyGoal;
   String get haptics;
   String get hapticsBody;
+  String get notifications;
+  String get notificationsBody;
+
+  /// The notification posted when a session ends with the app in the
+  /// background. Deliberately true in every case: in strict mode the tree may
+  /// already be dead, so neither "grown" nor "withered" can be promised here.
+  String get alarmTitle;
+  String get alarmBody;
   String get collection;
   String get dangerZone;
   String get clearGarden;
@@ -221,6 +229,16 @@ class En implements S {
   @override
   String get hapticsBody =>
       'Vibrate when the dial moves and when a tree is planted.';
+  @override
+  String get notifications => 'Notify when time is up';
+  @override
+  String get notificationsBody =>
+      'Posts a notification at the end of a session you are not watching. '
+      'Nothing is sent while Grove is open.';
+  @override
+  String get alarmTitle => 'Time is up';
+  @override
+  String get alarmBody => 'Open Grove to see how your tree turned out.';
   @override
   String get collection => 'Collection';
   @override
@@ -389,6 +407,14 @@ class Ko implements S {
   String get haptics => '진동';
   @override
   String get hapticsBody => '다이얼을 돌릴 때와 나무를 심을 때 진동합니다.';
+  @override
+  String get notifications => '끝나면 알림';
+  @override
+  String get notificationsBody => '보고 있지 않은 세션이 끝나면 알림을 보냅니다. 그로브가 열려 있을 때는 보내지 않습니다.';
+  @override
+  String get alarmTitle => '시간이 끝났습니다';
+  @override
+  String get alarmBody => '그로브를 열어 나무가 어떻게 되었는지 확인하세요.';
   @override
   String get collection => '수집';
   @override

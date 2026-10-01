@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:paper/paper.dart';
 
+import 'platform/session_alarm.dart';
 import 'state/garden_store.dart';
 import 'state/session_controller.dart';
 import 'ui/screens/focus_screen.dart';
@@ -109,7 +110,10 @@ class _ShellState extends State<_Shell> with WidgetsBindingObserver {
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
       case AppLifecycleState.detached:
-        store.onBackgrounded();
+        // The copy is built here because this is the last place that still
+        // has a BuildContext, and so a locale: by the time the alarm is
+        // armed the app is on its way out.
+        unawaited(store.onBackgrounded(alarm: _alarmCopy()));
       case AppLifecycleState.resumed:
         unawaited(store.onForegrounded());
       case AppLifecycleState.inactive:
@@ -118,6 +122,12 @@ class _ShellState extends State<_Shell> with WidgetsBindingObserver {
         // banner appeared.
         break;
     }
+  }
+
+  /// What the end-of-session notification should say, in the user's language.
+  AlarmCopy _alarmCopy() {
+    final strings = S.of(context);
+    return AlarmCopy(title: strings.alarmTitle, body: strings.alarmBody);
   }
 
   /// Runs the per-second tick only while a session is live.

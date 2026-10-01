@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:paper/paper.dart';
 
@@ -6,6 +8,7 @@ import '../domain/session.dart';
 import '../domain/settings.dart';
 import '../domain/species.dart';
 import '../domain/stats.dart';
+import '../platform/session_alarm.dart';
 import 'session_controller.dart';
 
 /// Application state for Grove.
@@ -19,15 +22,18 @@ class GardenStore extends ChangeNotifier {
     required GardenRepository repository,
     required SessionController controller,
     required DateTime Function() clock,
+    SessionAlarm alarm = const SilentAlarm(),
   }) : _repository = repository,
        _controller = controller,
-       _clock = clock {
+       _clock = clock,
+       _alarm = alarm {
     _controller.addListener(notifyListeners);
   }
 
   final GardenRepository _repository;
   final SessionController _controller;
   final DateTime Function() _clock;
+  final SessionAlarm _alarm;
 
   GardenData _data = GardenData.empty;
   bool _ready = false;
@@ -80,6 +86,10 @@ class GardenStore extends ChangeNotifier {
       );
       _recovered = resolved;
       _controller.adoptRecovered(resolved);
+      // The previous run may have gone away with an alarm armed. That
+      // session is over now, however it ended, so the notification would
+      // only announce a tree that is already in the garden or already dead.
+      await _alarm.disarm();
       await _persist();
     }
 
@@ -107,6 +117,11 @@ class GardenStore extends ChangeNotifier {
         preferredSpecies: species,
       ),
     );
+    // Asked for here and not at launch, because this is the first moment the
+    // user has said they want a timer, and not awaited, because the OS
+    // prompt must not hold up the session they just started. The answer is
+    // only needed later, when the app leaves the foreground.
+    if (settings.notify) unawaited(_alarm.requestPermission());
     await _persist();
   }
 
@@ -121,9 +136,32 @@ class GardenStore extends ChangeNotifier {
     if (finished != null) await _record(finished);
   }
 
-  void onBackgrounded() => _controller.onBackgrounded();
+  /// Hands the lifecycle change to the controller and arms the end-of-session
+  /// notification.
+  ///
+  /// Arming happens here rather than at [startSession] on purpose. While
+  /// Grove is on screen the countdown and the finish haptic already say the
+  /// time is up, so a notification would be noise - and on Android there is
+  /// no way to post one that the shade will not show. Arming on the way out
+  /// and dropping it on the way back in means the alarm exists exactly while
+  /// it is the only thing that can speak.
+  ///
+  /// [alarm] carries the localised copy; without it nothing is scheduled,
+  /// which is what keeps every test free of a notification plugin.
+  Future<void> onBackgrounded({AlarmCopy? alarm}) async {
+    _controller.onBackgrounded();
+    final active = _controller.active;
+    if (alarm == null || active == null || !settings.notify) return;
+    await _alarm.arm(
+      moment: active.startedAt.add(active.planned),
+      copy: alarm,
+    );
+  }
 
   Future<void> onForegrounded() async {
+    // Before resolving, so that a session the return has just killed cannot
+    // leave a notification behind to go off afterwards.
+    await _alarm.disarm();
     final finished = _controller.onForegrounded(strict: settings.strict);
     if (finished != null) await _record(finished);
   }
@@ -133,8 +171,22 @@ class GardenStore extends ChangeNotifier {
     _controller.acknowledge();
   }
 
+  /// Records whether the user wants the end-of-session notification, asking
+  /// the OS for permission the first time they say yes.
+  ///
+  /// The setting and the permission are deliberately two things. This stores
+  /// the intent; the OS decides whether anything is delivered, and the only
+  /// honest moment to ask it is the one where the user has just said they
+  /// want it.
+  Future<void> setNotify(bool value) async {
+    await updateSettings(settings.copyWith(notify: value));
+    if (value) await _alarm.requestPermission();
+  }
+
   Future<void> updateSettings(GroveSettings next) async {
+    final wasNotifying = settings.notify;
     _data = _data.copyWith(settings: next);
+    if (wasNotifying && !next.notify) await _alarm.disarm();
     await _persist();
     notifyListeners();
   }
@@ -147,6 +199,14 @@ class GardenStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Deliberately does not disarm. It looks like the one place that should,
+  // since every session ends here, but an alarm is only ever armed while the
+  // app is away - and on Android a Dart timer keeps running while the
+  // activity is stopped, so the tick that lands here can be the one a second
+  // after the notification was posted. Cancelling then would pull the banner
+  // back out of the shade before the user ever saw it, which is precisely the
+  // thing this feature exists to prevent. The alarm is dropped on the way
+  // back in instead, by [onForegrounded].
   Future<void> _record(FocusSession session) async {
     _data = _data.copyWith(
       sessions: <FocusSession>[
