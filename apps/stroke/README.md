@@ -1,16 +1,19 @@
-# stroke
+# Stroke
 
-A new Flutter project.
+A focused vector sketchbook. Pressure-aware strokes, layers, deep undo, and files that are plain JSON.
 
-## Getting Started
+Entirely offline: no account, no sync, and no network code in the app at all.
 
-This project is a starting point for a Flutter application.
+From this directory:
 
-A few resources to get you started if this is your first Flutter project:
+```sh
+flutter run      # run it
+flutter test     # this app's suite
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Or, from the repository root, `tool/check.sh stroke` to analyze and test it the
+way CI does.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The decisions behind this app - and what it deliberately does not do - are
+written up in the [repository README](../../README.md), next to the other
+three.

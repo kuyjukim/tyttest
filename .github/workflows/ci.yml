@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  # A new push supersedes an in-flight run on the same ref.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # One job per package: a failure then names the package in the job
+        # list rather than hiding in the middle of one long log.
+        package:
+          - packages/paper
+          - apps/grove
+          - apps/inkwell
+          - apps/ledger
+          - apps/stroke
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # Pinned: an unpinned toolchain turns an unrelated SDK release into
+          # a surprise red build on an unchanged branch.
+          flutter-version: 3.35.5
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        working-directory: ${{ matrix.package }}
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: ${{ matrix.package }}
+        run: flutter analyze
+
+      - name: Test
+        working-directory: ${{ matrix.package }}
+        run: flutter test
+
+  timezones:
+    name: Calendar arithmetic in other time zones
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [packages/paper, apps/grove, apps/ledger]
+        # One zone with DST and one on a half-hour offset. Day and month
+        # arithmetic that leans on a 24-hour Duration passes in UTC and fails
+        # in exactly these.
+        timezone: [America/New_York, Asia/Kolkata]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.35.5
+          channel: stable
+          cache: true
+      - name: Dependencies
+        working-directory: ${{ matrix.package }}
+        run: flutter pub get
+      - name: Test
+        working-directory: ${{ matrix.package }}
+        env:
+          TZ: ${{ matrix.timezone }}
+        run: flutter test
+
+  web-build:
+    name: Web build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [grove, inkwell, ledger, stroke]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.35.5
+          channel: stable
+          cache: true
+      - name: Dependencies
+        working-directory: apps/${{ matrix.app }}
+        run: flutter pub get
+      # The cheapest end-to-end compile available on a Linux runner: it
+      # catches the whole app failing to build, which `flutter test` does not,
+      # because tests only compile the libraries they import.
+      - name: Build
+        working-directory: apps/${{ matrix.app }}
+        run: flutter build web --release
