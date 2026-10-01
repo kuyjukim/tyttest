@@ -524,7 +524,10 @@ function drawTree(ctx, w, h, opts) {
   if (growth <= 0) return;
 
   const leaves = [];
-  const trunkLength = h * 0.34;
+  // Shorter than the app's 0.34. The app gives its trees a padded box; the
+  // thumbnails here are 92px tall and the fuller canopy needs the headroom,
+  // or the crown is sliced flat against the top edge.
+  const trunkLength = h * 0.27;
 
   ctx.beginPath();
   (function branch(ox, oy, angle, length, width, generation) {
@@ -549,12 +552,23 @@ function drawTree(ctx, w, h, opts) {
     ctx.lineTo(tx - nx * tipWidth / 2, ty - ny * tipWidth / 2);
     ctx.closePath();
 
-    if (generation >= depth) {
+    // Foliage on the outer two generations, not the tips alone: one ring of
+    // clusters reads as dots on a stick, two rings overlap into a canopy.
+    if (generation >= depth - 1) {
       const leafStage = stage(stageCount - 1);
-      if (leafStage > 0) leaves.push({ x: tx, y: ty, dir: a, scale: leafStage, size: length * 0.55, variant: rnd() });
-      return;
+      if (leafStage > 0) {
+        leaves.push({
+          x: tx, y: ty, dir: a, scale: leafStage,
+          // The inner ring is smaller, so it fills the canopy rather than
+          // doubling its outline.
+          size: length * (generation >= depth ? 0.72 : 0.56),
+          variant: rnd(),
+        });
+      }
     }
-    const childCount = rnd() < 0.28 ? 3 : 2;
+    if (generation >= depth) return;
+
+    const childCount = rnd() < 0.72 ? 3 : 2;
     for (let i = 0; i < childCount; i++) {
       const fraction = i / (childCount - 1);
       const off = (fraction - 0.5) * 2 * sp.branchAngle;
@@ -572,21 +586,21 @@ function drawTree(ctx, w, h, opts) {
       lf.variant < 0.45 ? sp.leaf : shift(sp.leaf, lf.variant < 0.72 ? 1.12 : 0.88);
     if (sp.canopy === 'cluster') {
       ctx.beginPath();
-      ctx.arc(lf.x, lf.y, lf.size * 0.5 * lf.scale * (0.78 + lf.variant * 0.44), 0, Math.PI * 2);
+      ctx.arc(lf.x, lf.y, lf.size * 0.72 * lf.scale * (0.80 + lf.variant * 0.46), 0, Math.PI * 2);
       ctx.fill();
     } else if (sp.canopy === 'needle') {
-      const len = lf.size * 0.62 * lf.scale;
-      ctx.lineWidth = Math.max(0.7, lf.size * 0.06);
+      const len = lf.size * 0.82 * lf.scale;
+      ctx.lineWidth = Math.max(0.8, lf.size * 0.075);
       ctx.lineCap = 'round';
       ctx.beginPath();
-      for (let i = -2; i <= 2; i++) {
-        const a = lf.dir + i * 0.42;
+      for (let i = -3; i <= 3; i++) {
+        const a = lf.dir + i * 0.34;
         ctx.moveTo(lf.x, lf.y);
         ctx.lineTo(lf.x + Math.sin(a) * len, lf.y - Math.cos(a) * len);
       }
       ctx.stroke();
     } else if (sp.canopy === 'fan') {
-      const r = lf.size * 0.6 * lf.scale;
+      const r = lf.size * 0.82 * lf.scale;
       const start = lf.dir - Math.PI / 2 - 0.6;
       ctx.beginPath();
       ctx.moveTo(lf.x, lf.y);
@@ -594,11 +608,11 @@ function drawTree(ctx, w, h, opts) {
       ctx.closePath();
       ctx.fill();
     } else { // trailing
-      const drop = lf.size * 1.25 * lf.scale;
+      const drop = lf.size * 1.45 * lf.scale;
       ctx.lineWidth = Math.max(0.8, lf.size * 0.07);
       ctx.lineCap = 'round';
       ctx.beginPath();
-      for (let i = -1; i <= 1; i++) {
+      for (let i = -2; i <= 2; i++) {
         const sx = lf.x + i * lf.size * 0.22;
         ctx.moveTo(sx, lf.y);
         ctx.quadraticCurveTo(sx + i * lf.size * 0.2, lf.y + drop * 0.6, sx + i * lf.size * 0.1, lf.y + drop);

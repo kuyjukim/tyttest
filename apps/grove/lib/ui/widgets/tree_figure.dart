@@ -171,8 +171,10 @@ class TreePainter extends CustomPainter {
     final tipWidth = width * 0.68;
     _addTaperedSegment(wood, origin, tip, width, tipWidth, effectiveAngle);
 
-    if (generation >= _depth) {
-      // A tip: foliage belongs here, and appears during the last stage.
+    // Foliage hangs on the outer two generations rather than the tips alone.
+    // One ring of clusters reads as dots on a stick; two rings overlap into
+    // something with a canopy.
+    if (generation >= _depth - 1) {
       final leafStage = _stage(_stageCount - 1, growth);
       if (leafStage > 0) {
         foliage.add(
@@ -180,17 +182,20 @@ class TreePainter extends CustomPainter {
             position: tip,
             direction: effectiveAngle,
             scale: leafStage,
-            size: length * 0.55,
+            // The inner ring is smaller, so it fills the canopy instead of
+            // doubling its outline.
+            size: length * (generation >= _depth ? 0.72 : 0.56),
             variant: random.nextDouble(),
           ),
         );
       }
-      return;
     }
+    if (generation >= _depth) return;
 
-    // Two children normally; a third, short and central, often enough to keep
-    // the silhouette from reading as a perfect binary fan.
-    final childCount = random.nextDouble() < 0.28 ? 3 : 2;
+    // Three children normally, two often enough that the silhouette does not
+    // read as a regular lattice. A binary fork spends its whole budget on
+    // outline and leaves the inside of the tree empty.
+    final childCount = random.nextDouble() < 0.72 ? 3 : 2;
     final spread = species.branchAngle;
     for (var i = 0; i < childCount; i++) {
       final fraction = childCount == 1 ? 0.5 : i / (childCount - 1);
@@ -247,7 +252,7 @@ class TreePainter extends CustomPainter {
         case Canopy.cluster:
           canvas.drawCircle(
             leaf.position,
-            leaf.size * 0.5 * leaf.scale * (0.78 + leaf.variant * 0.44),
+            leaf.size * 0.72 * leaf.scale * (0.80 + leaf.variant * 0.46),
             paint,
           );
         case Canopy.needle:
@@ -261,14 +266,14 @@ class TreePainter extends CustomPainter {
   }
 
   void _drawNeedles(Canvas canvas, _Leaf leaf, Paint paint) {
-    final length = leaf.size * 0.62 * leaf.scale;
+    final length = leaf.size * 0.82 * leaf.scale;
     final stroke = Paint()
       ..color = paint.color
-      ..strokeWidth = math.max(0.7, leaf.size * 0.06)
+      ..strokeWidth = math.max(0.8, leaf.size * 0.075)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
-    for (var i = -2; i <= 2; i++) {
-      final angle = leaf.direction + i * 0.42;
+    for (var i = -3; i <= 3; i++) {
+      final angle = leaf.direction + i * 0.34;
       canvas.drawLine(
         leaf.position,
         leaf.position + Offset(math.sin(angle), -math.cos(angle)) * length,
@@ -278,7 +283,7 @@ class TreePainter extends CustomPainter {
   }
 
   void _drawFan(Canvas canvas, _Leaf leaf, Paint paint) {
-    final radius = leaf.size * 0.6 * leaf.scale;
+    final radius = leaf.size * 0.82 * leaf.scale;
     final rect = Rect.fromCircle(center: leaf.position, radius: radius);
     // A ginkgo leaf is a fan: a wide arc notched at the stem.
     canvas.drawArc(rect, leaf.direction - math.pi / 2 - 0.6, 1.2, true, paint);
@@ -290,8 +295,8 @@ class TreePainter extends CustomPainter {
       ..strokeWidth = math.max(0.8, leaf.size * 0.07)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
-    final drop = leaf.size * 1.25 * leaf.scale;
-    for (var i = -1; i <= 1; i++) {
+    final drop = leaf.size * 1.45 * leaf.scale;
+    for (var i = -2; i <= 2; i++) {
       final start = leaf.position + Offset(i * leaf.size * 0.22, 0);
       final path = Path()
         ..moveTo(start.dx, start.dy)
