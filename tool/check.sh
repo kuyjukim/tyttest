@@ -59,4 +59,16 @@ for package in packages/paper apps/grove apps/ledger; do
   done
 done
 
+# The Android build is the one build this repository cannot run - the SDK
+# platform is served only by dl.google.com - so the cheap half of what the
+# build would have told us is checked here instead. Only when the whole
+# repository is being checked: it is about resources, not about one package.
+if [[ $# -eq 0 ]]; then
+  step "android resources"
+  tool/check_android_res.py
+
+  step "store listing fields"
+  tool/check_listing.py apps/ledger/store
+fi
+
 step "all checks passed"

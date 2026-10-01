@@ -10,6 +10,12 @@ has no Xcode, no Android SDK and no device of either kind.
   root. Every iOS and Android size is produced from one renderer, and the
   1024 marketing icon is written without an alpha channel - App Store
   Connect rejects one that has it, and the rejection arrives after upload.
+- **Privacy policy**, both languages, in `store/privacy-policy.md`. It
+  discloses the one thing the listing copy used to get wrong: the app sends
+  nothing anywhere, but the *operating system's* backup includes this app's
+  file like any other app's, on both platforms. That is left switched on - a
+  budget history that does not survive a phone change is worth less than the
+  claim it would buy - and said plainly instead.
 - **Export compliance.** `ITSAppUsesNonExemptEncryption = false` in
   `Info.plist`. True for this app: it contains no encryption. **Inkwell must
   not copy this** - it uses AES and Argon2 and has to answer the question
@@ -85,16 +91,31 @@ is correct by inspection only.
 3. **Run it on a real phone.** Nothing here has executed on Android either.
    The back gesture, the IME over the amount field, and the system font are
    all first seen there.
-4. **Privacy policy URL.** Play requires one for every app, including one
-   that collects nothing, and will not accept "we collect nothing" as a
-   substitute. It has to be a page you host.
-5. **Data safety form.** Declare no collection and no sharing. It is
-   answered in the console, not in the repository, and a wrong answer here
-   is treated as a policy violation rather than a mistake.
-6. **Content rating questionnaire**, and the target audience declaration.
-7. **Screenshots.** Play takes the same PNGs as the App Store set, which are
+
+What *is* checked here is the half that does not need a compiler:
+`tool/check_android_res.py` resolves every `@type/name` in the manifest and
+in res/ against the resources that exist, and checks the adaptive icon has
+all its layers at every density with a flat icon behind it. A mistyped
+`@mipmap/ic_launcher_foreground` is normally caught in the first ten seconds
+of the first build; without that build it would otherwise be caught by a user
+whose home screen is blank. `tool/check.sh` runs it.
+4. **Privacy policy URL.** Both stores require one, Play even for an app
+   that collects nothing, and neither accepts "we collect nothing" as a
+   substitute for a page. The text is written, in both languages, in
+   `store/privacy-policy.md`. Two fields have to be filled in before it goes
+   anywhere - the developer name and a contact address - and then it needs
+   hosting at a public URL.
+5. **Data safety form, content rating, target audience.** Answered in the
+   console rather than in the repository, and a wrong answer is treated as a
+   policy violation rather than a mistake. The answers, with the reasoning
+   for each, are in `store/play-console.md`.
+6. **Screenshots.** Play takes the same PNGs as the App Store set, which are
    within its size limits - but they carry the same caveat: rendered by the
    test harness with a substitute font, not by a device.
+7. **Closed testing, if the Play account is a new personal one.** Twelve
+   testers for fourteen continuous days before production access can even be
+   applied for. Organisation accounts are exempt. Check the current rule in
+   the console: this one moves, and it is weeks of calendar time either way.
 
 ## Pricing
 

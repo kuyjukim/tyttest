@@ -48,7 +48,7 @@ Pay once. Using an app that takes money every month to manage the money that lea
 
 ■ No networking code at all
 
-Not "we don't collect data" - there is no network code in the app. No account, no sign-in, no ads, no bank connection. Your records are on this device, and nothing here can stop working because a server did.
+Not "we don't collect data" - there is no network code in the app. No account, no sign-in, no ads, no bank connection. The app sends your records nowhere, so nothing here can stop working because a server did. If you have your phone’s own backup turned on, this app’s file is included in it like every other app’s - that is between you and Apple or Google, and the developer cannot see it.
 
 ■ Also
 

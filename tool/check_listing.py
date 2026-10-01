@@ -23,6 +23,13 @@ import re
 import sys
 
 
+# A listing file is one locale of one store: `play-ko.md`, `listing-en.md`,
+# and room for the regional forms (`play-pt-BR.md`) if the app ever ships to
+# a market that needs one. Matching `play-*.md` instead would sweep up notes
+# that live beside the copy - which it did, the first time.
+LISTING_FILE = re.compile(r'^(?P<prefix>\w+)-(?P<locale>[a-z]{2}(?:-[A-Za-z]{2,4})?)\.md$')
+
+
 class Store:
     def __init__(self, name: str, prefix: str, limits: dict[str, int],
                  aliases: dict[str, str], searchable: tuple[str, ...] = ()):
@@ -147,7 +154,11 @@ def main() -> int:
     root = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else '.')
     results: list[bool] = []
     for store in STORES:
-        files = sorted(root.glob(f'{store.prefix}-*.md'))
+        files = sorted(
+            path for path in root.glob(f'{store.prefix}-*.md')
+            if (match := LISTING_FILE.match(path.name))
+            and match['prefix'] == store.prefix
+        )
         if not files:
             print(f'No {store.prefix}-*.md under {root} - '
                   f'nothing to check for {store.name}', file=sys.stderr)
