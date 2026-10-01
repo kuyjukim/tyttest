@@ -136,6 +136,43 @@ niches that *are* open in Education are narrow licences too small for a
 freemium business to chase: NYC taxi, linemen, ham radio, aviation
 maintenance. Narrow is the requirement, not a side effect.
 
+## Does the demand side exist at all
+
+The open chart position is worth nothing if Americans do not do this. They
+do, and by a wide margin - envelope budgeting is American in origin, and the
+method is in the middle of a revival:
+
+- **Cash stuffing** - cash into labelled envelopes on payday, filmed - has
+  1.9 billion views under its own hashtag and more than 3 billion across
+  related ones. Roughly three quarters of Gen Z know what it is and about a
+  third do some form of it.
+- Federal Reserve data has the average American holding $364 in cash set
+  aside for savings and emergencies, up from $306 two years earlier, with
+  45% of consumers holding some.
+- One creator built a business selling cash-stuffing binders and courses
+  that reportedly took $2.2m in 2024. People are buying *stationery* for
+  this.
+- 85% of Americans say they budget; 69% budget at least sometimes, 35.5%
+  always.
+
+So the method is not the risk. But one number in the same research is the
+whole problem, and it cuts both ways:
+
+> **How Americans budget: pen and paper 37%, spreadsheets 27%, mobile apps
+> 22%.**
+
+Two thirds of budgeters have looked at the app shelf and chosen a notebook
+or a spreadsheet instead. And the cash-stuffing crowd specifically chose
+*physical cash* - the tactility is the point of the trend, and an app is in
+some sense the opposite of what it is asking for.
+
+That reframes the product. Ledger's competition is not YNAB. It is a
+notebook and a Google Sheet, and the person worth selling to is the one who
+wants the envelope method but has stopped carrying cash. "The envelope
+system, for people who do not carry cash" is a sharper sentence than any
+comparison to a subscription app, and the research says it points at a real
+and large group.
+
 ## What has a chance
 
 1. **Ledger, in the US paid Finance chart.** Ten categories checked and this
