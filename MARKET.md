@@ -257,3 +257,86 @@ Whatever is attempted next, the check comes first, and the check is not
    here was one open position in ten categories. That is the base rate, and
    it is the argument for shipping what exists rather than hunting for
    something better.
+
+
+## Attacking the incumbents instead: eight for eight
+
+The last question left was the hard one - not what is unoccupied, but what
+can be done better than an app that is visibly making money. Eight agents
+took eight incumbents with a confirmed price and rating count, read their
+one- and two-star reviews, and were told that a grievance is not a wedge
+until you know what happened to the people who already acted on it.
+
+**Six came back "already attacked and failed". Two came back "moated". None
+survived.** Between them the agents named about 93 challengers.
+
+### The five numbers that end the argument
+
+- **Tides Near Me - No Ads, $2.99, one time.** Built by the largest developer
+  in the tide category, who also owns the free app with 162,000 ratings to
+  cross-sell from. It is exactly the "stop charging a subscription for
+  public-domain NOAA data" answer. It has **2,700 ratings against Tide
+  Alert's 44,000** - and the same developer then abandoned their Android
+  lifetime-paid version and shipped a $15/yr subscription instead. The person
+  best placed on earth to run this attack ran it, and then switched sides.
+- **BuildCalc, $24.99, one time, seventeen years, still updated.** Genuinely
+  deeper than Construction Master - purlin angles, backing angles, stringer
+  throat - and endorsed by working carpenters and by Fine Homebuilding.
+  **147 iOS ratings against the incumbent's 40,000.** Meanwhile Handyman
+  Calculator, the only challenger that ever reached scale at 1,000,000+
+  downloads and 23,000 ratings, was unpublished from Google Play in 2025. A
+  million installs and no business.
+- **Photo Ephemeris 3D is dead.** The best-regarded one-time-purchase
+  sun-planning app, by a respected developer, withdrawn from sale in
+  September 2025. Sun Surveyor has fought Sun Seeker head to head for fifteen
+  years at a *lower* one-time price and holds about 2% of its iOS ratings.
+- **The Anki fix exists and cannot ship.** `amgi` is a full open-source iOS
+  client - real sync, FSRS, image occlusion, Apple Watch - committed to last
+  month. The AGPL is incompatible with App Store distribution and AnkiWeb's
+  terms whitelist four clients. The app that *did* win commercially, Noji,
+  got 2.3M downloads and top-100 top-grossing Education in nine countries by
+  **abandoning Anki compatibility entirely** and selling a subscription.
+- **Pilots will not rent an E6B.** EF1 tried it at $3.99/mo and has six
+  ratings. E6B Aviation Calculator shipped *more* features than Sporty's and
+  died at 146. The thing beating the subscription is the incumbent's own
+  $9.99 one-time price.
+
+### What the incumbents actually have
+
+Not better software. In every one of the eight, the better, cheaper,
+offline, no-subscription, privacy-respecting app **already exists**, is often
+genuinely superior, and holds between 0.3% and 7% of the incumbent's ratings.
+
+What they have instead is distribution and default status:
+
+| Incumbent | What protects it |
+| --- | --- |
+| Construction Master Pro | It is the instrument *named in the licensing exam*. The 4065 handheld is approved for the Florida and NASCLA contractor exams, sold in exam bundles, and carried as courseware by a trade curriculum publisher. Every cohort learns its keystrokes before they ever install an app. |
+| Tide Alert | It put "NOAA" in its own title and owns the generic search. |
+| Sporty's E6B | A pilot shop that has sold to student pilots for decades. |
+| QuickBend | What journeymen were already handed. |
+| AnkiMobile | A licence and a terms-of-service whitelist that make the better client illegal to ship. |
+| Paprika | Ten years of being the answer, and 54,000 ratings saying so. |
+
+**A rival can copy the maths exactly and still not be the thing in the
+textbook.**
+
+## The conclusion of all of it
+
+Across three rounds this repository asked the question three ways - what is
+empty, what is in the shape of a winner, what can beat a winner - and got the
+same answer each time, from 108, then 93, named competing apps.
+
+The engineering is not the scarce input. Every niche examined already has a
+dozen competent solo developers in it, several of whom have built the better
+product and been ignored. **The scarce input is distribution** - an exam
+board, a shop counter, a search term, a licence, ten years of being the
+default - and none of it is in a repository.
+
+So "make a number-one paid app" was never an engineering problem, and the
+four apps here are not failed engineering. They are good software with no
+route to a chart, because a route to a chart is not made of software.
+
+The honest next question is not about code at all. It is: **what audience,
+trade, community or channel is already yours?** Every winner above started
+with one. That is an input only the person reading this can supply.
