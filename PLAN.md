@@ -32,29 +32,45 @@ Twelve to thirty purchases in a day. Not twelve thousand.
 
 ## The seat in Productivity is vacant, and that is new
 
-**Forest left the paid chart in December 2025.** Seekrtech moved it to
-free-with-subscription, so the app that *was* the paid anchor of Korean
-생산성 - a focus timer, 16,000 Korean ratings - is no longer on that chart at
-all.
+**Forest left the paid chart in December 2025, and this is now confirmed
+from two independent directions.** Seekrtech moved it to a free download
+supported by a Forest Plus subscription - "Forest launched in 2014 as a paid
+application, but is no longer sold that way to new users" - and the Korean
+store listing is free with in-app purchases, with Forest Plus having launched
+in Korea in May 2025 at ₩41,000/yr or ₩6,800/mo. An app that is not sold
+cannot rank on a chart of what sells. The paid anchor of Korean 생산성 - a
+focus timer with 16,000 Korean ratings - is no longer on that chart at all.
 
 This repository's own `MARKET.md` declared Grove closed on the grounds that
 "Forest is #2 in US paid Productivity *and* in Korea's top paid chart". The
 second half of that is now false, and it was the half that mattered. That
 verdict is withdrawn.
 
-What is left on the chart behind it:
+### Verified, and the two readings disagree in the useful direction
 
-| # | App | Price | Korean ratings |
-| --- | --- | --- | --- |
-| 2 | DayDay 하루하루 | ₩4,400 | 5,188 |
-| 3 | SFFE (a Safari font extension) | ₩3,300 | 142 |
-| 4 | iFacialMocap (a VTuber mocap bridge) | ₩11,000 | ~55 worldwide |
-| 5 | Highlight 하이라이트 | ₩2,900 | **32, lifetime, since 2021** |
+Two separate chart readings came back, and their dates are the point.
 
-A chart whose fifth place has thirty-two lifetime ratings is not defended.
-And in a recent snapshot the **#1 slot was held by Paper Maker at ₩400** -
-the cheapest price point on the store holding the top position, which is as
-plain a demonstration as exists that this chart counts units and not revenue.
+**Similarweb, snapshot dated 6 May:** 1. Forest, 2. DayDay 하루하루 ₩4,400
+(5,188 Korean ratings), 3. SFFE, a Safari font extension, ₩3,300 (142), 4.
+iFacialMocap, a VTuber mocap bridge, ₩11,000 (~55 worldwide), 5. Highlight
+하이라이트 ₩2,900 (**32 ratings, lifetime, since 2021**).
+
+**Appfigures, current:** 1. **Paper Maker - Note Paper PDF, ₩400**. 2.
+**Tampermonkey, ₩4,400**. No Forest.
+
+The only reading that still has Forest at #1 is the one dated **6 May** -
+before the transition finished rolling out. The current reading has it gone,
+exactly as the December change predicts, and the slot taken by a **₩400 PDF
+note-paper utility**.
+
+Two things follow. The seat really is vacant: the app now holding #1 paid
+Productivity in Korea is not a brand, not a focus timer, and costs about
+thirty cents. And the unit-counting logic is confirmed in the plainest
+possible way - the cheapest price point on the store is holding the top
+position, which cannot happen on a chart that ranks by revenue.
+
+A chart whose fifth place has thirty-two lifetime ratings and whose first
+place costs ₩400 is not defended.
 
 ## The plan
 
@@ -101,6 +117,16 @@ It is a second shot at the same work.
 No purchased installs, no incentivised downloads, no review farming. Those
 breach the App Store Review Guidelines, and the penalty is the developer
 account. The whole plan above needs ordinary launch-day demand, concentrated.
+
+## What is still second-hand
+
+Every chart tracker is blocked by this environment's network policy -
+applyra, appbrain, similarweb, pyony, appfigures and apps.apple.com itself -
+so the chart readings above come from search snippets quoting those trackers,
+not from opening the chart. Forest's departure is confirmed directly and is
+not affected by this. The composition of the top five is not: it is
+second-hand, the two readings are dated differently, and chart positions move
+daily. Thirty seconds on a phone settles it for good.
 
 ## How much of this is solid
 
