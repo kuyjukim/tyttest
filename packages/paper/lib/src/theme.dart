@@ -81,11 +81,7 @@ abstract final class PaperTheme {
         centerTitle: false,
         titleTextStyle: type.heading,
       ),
-      dividerTheme: DividerThemeData(
-        color: c.hairline,
-        thickness: 1,
-        space: 1,
-      ),
+      dividerTheme: DividerThemeData(color: c.hairline, thickness: 1, space: 1),
       iconTheme: IconThemeData(color: c.ink, size: 22),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: c.ink,

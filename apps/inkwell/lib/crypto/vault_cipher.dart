@@ -23,8 +23,10 @@ sealed class VaultError implements Exception {
 /// was for the user would mean guessing wrong sometimes.
 class WrongPassphrase extends VaultError {
   const WrongPassphrase()
-    : super('The passphrase did not open this vault, or the file has been '
-          'modified.');
+    : super(
+        'The passphrase did not open this vault, or the file has been '
+        'modified.',
+      );
 }
 
 /// The file is not a vault, or is damaged beyond the header.

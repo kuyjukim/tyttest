@@ -185,7 +185,8 @@ class _EditorScreenState extends State<EditorScreen> {
 
   /// An entry with no title and no body is not worth sealing the vault for.
   bool get _canSave =>
-      !_saving && (_title.text.trim().isNotEmpty || _body.text.trim().isNotEmpty);
+      !_saving &&
+      (_title.text.trim().isNotEmpty || _body.text.trim().isNotEmpty);
 
   void _markDirty() {
     if (_dirty) {

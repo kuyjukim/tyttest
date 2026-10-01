@@ -137,5 +137,6 @@ class Entry {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => 'Entry($id, ${day.toString()}, "${titleOr('untitled')}")';
+  String toString() =>
+      'Entry($id, ${day.toString()}, "${titleOr('untitled')}")';
 }

@@ -57,30 +57,24 @@ class _StatsScreenState extends State<StatsScreen> {
       padding: const EdgeInsets.only(bottom: Gap.x3l),
       children: [
         const SizedBox(height: Gap.lg),
-        Row(
-          children: [
-            Expanded(
-              child: StatTile(
-                label: strings.statTodayLabel,
-                value: strings.span(store.todayTotal.focused),
-                emphasis: true,
-              ),
+        StatRow(
+          tiles: [
+            StatTile(
+              label: strings.statTodayLabel,
+              value: strings.span(store.todayTotal.focused),
+              emphasis: true,
             ),
-            Expanded(
-              child: StatTile(
-                label: strings.statStreakLabel,
-                value: '${streak.current}',
-                unit: strings.streakUnitDays,
-                caption: streak.longest > streak.current
-                    ? '${strings.bestDay}: ${streak.longest}'
-                    : null,
-              ),
+            StatTile(
+              label: strings.statStreakLabel,
+              value: '${streak.current}',
+              unit: strings.streakUnitDays,
+              caption: streak.longest > streak.current
+                  ? '${strings.bestDay}: ${streak.longest}'
+                  : null,
             ),
-            Expanded(
-              child: StatTile(
-                label: strings.statLifetimeLabel,
-                value: strings.span(store.totalFocused),
-              ),
+            StatTile(
+              label: strings.statLifetimeLabel,
+              value: strings.span(store.totalFocused),
             ),
           ],
         ),
@@ -116,7 +110,9 @@ class _StatsScreenState extends State<StatsScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    DateFormat.yMMMEd(context.localeTag).format(best.day.startOfDay),
+                    DateFormat.yMMMEd(
+                      context.localeTag,
+                    ).format(best.day.startOfDay),
                     style: context.type.body,
                   ),
                 ),

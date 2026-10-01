@@ -18,7 +18,10 @@ class Hairline extends StatelessWidget {
     final thickness = 1 / MediaQuery.devicePixelRatioOf(context);
     return Padding(
       padding: EdgeInsets.only(left: indent),
-      child: Container(height: thickness, color: color ?? context.colors.hairline),
+      child: Container(
+        height: thickness,
+        color: color ?? context.colors.hairline,
+      ),
     );
   }
 }
@@ -132,7 +135,10 @@ class PaperScaffold extends StatelessWidget {
       appBar: AppBar(
         title: Text(title, style: context.type.heading),
         leading: leading,
-        actions: [...actions, const SizedBox(width: Gap.xs)],
+        actions: [
+          ...actions,
+          const SizedBox(width: Gap.xs),
+        ],
       ),
       floatingActionButton: floatingAction,
       bottomNavigationBar: bottomBar,

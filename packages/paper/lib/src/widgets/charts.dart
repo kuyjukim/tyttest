@@ -43,16 +43,32 @@ class StatTile extends StatelessWidget {
         children: [
           Text(label, style: context.type.label),
           const SizedBox(height: Gap.xs),
+          // Aligned on the bottom rather than the baseline, because the
+          // value shrinks to fit and a scaled box reports no baseline for a
+          // row to align to. The unit's two pixels of bottom padding are what
+          // put it back on the number's baseline by eye.
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                value,
-                style: context.type.numeric.copyWith(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w600,
-                  color: emphasis ? colors.accent : colors.ink,
+              // Three of these sit side by side in an equal-width row, so the
+              // slot can be narrower than the number in it - "67시간" at 26pt
+              // does not fit a third of a phone. Shrinking is the only honest
+              // option: wrapping breaks a number across lines and ellipsis
+              // turns 1,240 into 1,2… which is a different number.
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: context.type.numeric.copyWith(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
+                      color: emphasis ? colors.accent : colors.ink,
+                    ),
+                  ),
                 ),
               ),
               if (unit != null) ...[
@@ -70,6 +86,37 @@ class StatTile extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// A row of [StatTile]s, evenly divided, with air between them.
+///
+/// Exists because three `Expanded` tiles in a bare `Row` touch. Each tile
+/// fills its third exactly, so a value wide enough to reach the edge runs
+/// straight into the next tile's number and "1시간 15분" beside "10" reads as
+/// a single wrong number. Both apps that show stats had written the bare row
+/// and both had the bug, which makes the gap this package's to decide rather
+/// than something each app has to remember.
+class StatRow extends StatelessWidget {
+  const StatRow({required this.tiles, super.key});
+
+  /// Two or three. Four on a phone leaves each number too narrow to read,
+  /// and at that point it wants to be a list rather than a row.
+  final List<StatTile> tiles;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      // Top-aligned: one tile may carry a caption the others do not, and
+      // centring would then float the other two off the shared label line.
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        for (final (index, tile) in tiles.indexed) ...<Widget>[
+          if (index > 0) const SizedBox(width: Gap.lg),
+          Expanded(child: tile),
+        ],
+      ],
     );
   }
 }

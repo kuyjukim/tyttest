@@ -16,13 +16,22 @@ const Color groveAccent = Color(0xFF2F7D5B);
 
 /// Root widget. Owns the theme, the locale and the single [GardenStore].
 class GroveApp extends StatelessWidget {
-  const GroveApp({required this.store, this.locale, super.key});
+  const GroveApp({
+    required this.store,
+    this.locale,
+    this.fontFamily,
+    super.key,
+  });
 
   final GardenStore store;
 
   /// Forces a language, overriding the device setting. Null follows the
   /// device, which is what the shipped app does.
   final Locale? locale;
+
+  /// Overrides the platform text face. Null in the shipped app; set by the
+  /// screenshot run, which has no platform font to fall back to.
+  final String? fontFamily;
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +41,11 @@ class GroveApp extends StatelessWidget {
         builder: (context, store) => MaterialApp(
           onGenerateTitle: (context) => S.of(context).appName,
           debugShowCheckedModeBanner: false,
-          theme: PaperTheme.light(accent: groveAccent),
-          darkTheme: PaperTheme.dark(accent: groveAccent),
+          theme: PaperTheme.light(accent: groveAccent, fontFamily: fontFamily),
+          darkTheme: PaperTheme.dark(
+            accent: groveAccent,
+            fontFamily: fontFamily,
+          ),
           themeMode: store.settings.themeMode,
           locale: locale,
           localizationsDelegates: localizationDelegates(S.delegate),

@@ -56,7 +56,11 @@ class PaperType extends ThemeExtension<PaperType> {
         letterSpacing: -0.2,
       ),
       body: TextStyle(
-        fontFamily: fontFamily,color: ink, fontSize: 16, height: 1.5),
+        fontFamily: fontFamily,
+        color: ink,
+        fontSize: 16,
+        height: 1.5,
+      ),
       bodyStrong: TextStyle(
         fontFamily: fontFamily,
         color: ink,
@@ -73,7 +77,11 @@ class PaperType extends ThemeExtension<PaperType> {
         letterSpacing: 0.1,
       ),
       caption: TextStyle(
-        fontFamily: fontFamily,color: muted, fontSize: 12, height: 1.35),
+        fontFamily: fontFamily,
+        color: muted,
+        fontSize: 12,
+        height: 1.35,
+      ),
       // Tabular figures matter more than they sound: without them a running
       // timer or a column of amounts jitters horizontally on every tick.
       numeric: TextStyle(

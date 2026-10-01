@@ -135,7 +135,8 @@ class En implements S {
   String witheredBody(FailureReason reason) => switch (reason) {
     FailureReason.gaveUp => 'You ended the session early.',
     FailureReason.leftApp => 'You left the app while strict mode was on.',
-    FailureReason.appClosed => 'The app stopped running before the timer ended.',
+    FailureReason.appClosed =>
+      'The app stopped running before the timer ended.',
   };
   @override
   String get done => 'Done';
@@ -218,7 +219,8 @@ class En implements S {
   @override
   String get haptics => 'Haptics';
   @override
-  String get hapticsBody => 'Vibrate when the dial moves and when a tree is planted.';
+  String get hapticsBody =>
+      'Vibrate when the dial moves and when a tree is planted.';
   @override
   String get collection => 'Collection';
   @override

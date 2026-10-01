@@ -18,8 +18,7 @@ class ActiveSession {
 
   factory ActiveSession.fromJson(Map<String, Object?> json) => ActiveSession(
     id: json['id']! as String,
-    species:
-        Species.byName(json['species'] as String? ?? '') ?? Species.sprout,
+    species: Species.byName(json['species'] as String? ?? '') ?? Species.sprout,
     planned: Duration(seconds: json['plannedSeconds']! as int),
     startedAt: DateTime.parse(json['startedAt']! as String).toLocal(),
     tag: json['tag'] as String?,

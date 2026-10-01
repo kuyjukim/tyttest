@@ -98,10 +98,8 @@ class _DaySection extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   itemCount: sessions.length,
                   separatorBuilder: (_, _) => const SizedBox(width: Gap.xs),
-                  itemBuilder: (context, index) => _TreeTile(
-                    session: sessions[index],
-                    strings: strings,
-                  ),
+                  itemBuilder: (context, index) =>
+                      _TreeTile(session: sessions[index], strings: strings),
                 ),
               ),
               const SizedBox(height: Gap.sm),

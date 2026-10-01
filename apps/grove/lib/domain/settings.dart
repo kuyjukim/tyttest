@@ -79,7 +79,11 @@ class GroveSettings {
 
   /// Reads a persisted minute count, defending against a hand-edited or
   /// newer-version file that holds a string, a double or something absurd.
-  static int _clampMinutes(Object? raw, {required int fallback, int max = 120}) {
+  static int _clampMinutes(
+    Object? raw, {
+    required int fallback,
+    int max = 120,
+  }) {
     final value = switch (raw) {
       final int v => v,
       final double v => v.round(),

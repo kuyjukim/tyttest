@@ -179,7 +179,10 @@ class SettingRow extends StatelessWidget {
               ),
             ),
             if (value != null)
-              Text(value!, style: context.type.body.copyWith(color: colors.inkMuted)),
+              Text(
+                value!,
+                style: context.type.body.copyWith(color: colors.inkMuted),
+              ),
             const SizedBox(width: Gap.xs),
             Icon(Icons.chevron_right_rounded, size: 20, color: colors.inkFaint),
           ],

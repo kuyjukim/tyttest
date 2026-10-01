@@ -44,7 +44,11 @@ class EmptyState extends StatelessWidget {
               child: Center(child: Icon(icon, size: 28, color: colors.accent)),
             ),
             const SizedBox(height: Gap.xl),
-            Text(title, style: context.type.heading, textAlign: TextAlign.center),
+            Text(
+              title,
+              style: context.type.heading,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: Gap.sm),
             Text(
               message,

@@ -219,8 +219,7 @@ class _SpeciesRow extends StatelessWidget {
                     color: unlocked ? colors.ink : colors.inkMuted,
                   ),
                 ),
-                if (!unlocked)
-                  Text(requirement, style: context.type.caption),
+                if (!unlocked) Text(requirement, style: context.type.caption),
               ],
             ),
           ),

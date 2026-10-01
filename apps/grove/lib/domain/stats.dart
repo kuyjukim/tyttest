@@ -73,8 +73,7 @@ abstract final class Stats {
     final keys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
     return <Day, List<FocusSession>>{
       for (final key in keys)
-        key: grouped[key]!
-          ..sort((a, b) => b.startedAt.compareTo(a.startedAt)),
+        key: grouped[key]!..sort((a, b) => b.startedAt.compareTo(a.startedAt)),
     };
   }
 
@@ -164,7 +163,10 @@ abstract final class Stats {
       if (run > longest) longest = run;
     }
 
-    return Streak(current: current, longest: longest > current ? longest : current);
+    return Streak(
+      current: current,
+      longest: longest > current ? longest : current,
+    );
   }
 
   /// Completed-session count by species, for the collection screen.

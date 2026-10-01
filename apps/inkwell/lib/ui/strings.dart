@@ -180,8 +180,7 @@ class En implements S {
   @override
   String get onThisDay => 'On this day';
   @override
-  String yearsAgo(int years) =>
-      years == 1 ? 'A year ago' : '$years years ago';
+  String yearsAgo(int years) => years == 1 ? 'A year ago' : '$years years ago';
   @override
   String get untitled => 'Untitled';
   @override
@@ -239,7 +238,8 @@ class En implements S {
   @override
   String get writingActivity => 'Entries per day';
   @override
-  String get insightsEmpty => 'Write a few entries and your patterns show up here.';
+  String get insightsEmpty =>
+      'Write a few entries and your patterns show up here.';
   @override
   String get days => 'days';
 
@@ -368,8 +368,7 @@ class Ko implements S {
   @override
   String get unlockAction => '열기';
   @override
-  String get wrongPassphrase =>
-      '일기를 열지 못했습니다. 암호문구가 확실하다면 파일이 수정되었을 수 있습니다.';
+  String get wrongPassphrase => '일기를 열지 못했습니다. 암호문구가 확실하다면 파일이 수정되었을 수 있습니다.';
   @override
   String lockedOutFor(String span) => '시도가 너무 많습니다. $span 후에 다시 시도하세요.';
   @override
@@ -511,8 +510,7 @@ class Ko implements S {
   @override
   String get destroyConfirmTitle => '전부 삭제할까요?';
   @override
-  String get destroyConfirmBody =>
-      '이 기기에서 모든 기록이 지워집니다. 백업도 복구도 없습니다.';
+  String get destroyConfirmBody => '이 기기에서 모든 기록이 지워집니다. 백업도 복구도 없습니다.';
   @override
   String get destroyConfirmAction => '전부 삭제';
 

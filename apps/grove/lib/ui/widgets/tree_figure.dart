@@ -80,8 +80,7 @@ class TreePainter extends CustomPainter {
   /// work.
   final int? depthLimit;
 
-  int get _depth =>
-      depthLimit == null || depthLimit! > figure.species.depth
+  int get _depth => depthLimit == null || depthLimit! > figure.species.depth
       ? figure.species.depth
       : (depthLimit! < 1 ? 1 : depthLimit!);
 
@@ -272,8 +271,7 @@ class TreePainter extends CustomPainter {
       final angle = leaf.direction + i * 0.42;
       canvas.drawLine(
         leaf.position,
-        leaf.position +
-            Offset(math.sin(angle), -math.cos(angle)) * length,
+        leaf.position + Offset(math.sin(angle), -math.cos(angle)) * length,
         stroke,
       );
     }
@@ -283,13 +281,7 @@ class TreePainter extends CustomPainter {
     final radius = leaf.size * 0.6 * leaf.scale;
     final rect = Rect.fromCircle(center: leaf.position, radius: radius);
     // A ginkgo leaf is a fan: a wide arc notched at the stem.
-    canvas.drawArc(
-      rect,
-      leaf.direction - math.pi / 2 - 0.6,
-      1.2,
-      true,
-      paint,
-    );
+    canvas.drawArc(rect, leaf.direction - math.pi / 2 - 0.6, 1.2, true, paint);
   }
 
   void _drawTrailing(Canvas canvas, _Leaf leaf, Paint paint) {
@@ -335,7 +327,9 @@ class TreePainter extends CustomPainter {
   /// Lightens ([factor] > 1) or darkens a colour, staying in gamut.
   static Color _shift(Color color, double factor) {
     final hsl = HSLColor.fromColor(color);
-    return hsl.withLightness((hsl.lightness * factor).clamp(0.0, 1.0)).toColor();
+    return hsl
+        .withLightness((hsl.lightness * factor).clamp(0.0, 1.0))
+        .toColor();
   }
 
   @override

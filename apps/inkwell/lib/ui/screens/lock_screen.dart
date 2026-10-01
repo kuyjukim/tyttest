@@ -79,7 +79,9 @@ class _LockScreenState extends State<LockScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Icon(
-                    creating ? Icons.edit_note_rounded : Icons.lock_outline_rounded,
+                    creating
+                        ? Icons.edit_note_rounded
+                        : Icons.lock_outline_rounded,
                     size: 36,
                     color: context.colors.accent,
                   ),
@@ -109,7 +111,9 @@ class _LockScreenState extends State<LockScreen> {
                         ? TextInputAction.next
                         : TextInputAction.go,
                     onChanged: (_) => setState(() => _error = null),
-                    onSubmitted: creating ? null : (_) => _submit(store, strings),
+                    onSubmitted: creating
+                        ? null
+                        : (_) => _submit(store, strings),
                     decoration: InputDecoration(
                       labelText: strings.passphraseLabel,
                       suffixIcon: IconButton(
@@ -129,7 +133,8 @@ class _LockScreenState extends State<LockScreen> {
                     _StrengthMeter(
                       value: Passphrase.meter(_passphrase.text),
                       label: strings.strengthLabel(strength),
-                      weak: strength == PassphraseStrength.tooShort ||
+                      weak:
+                          strength == PassphraseStrength.tooShort ||
                           strength == PassphraseStrength.weak,
                     ),
                     const SizedBox(height: Gap.lg),
@@ -171,7 +176,9 @@ class _LockScreenState extends State<LockScreen> {
                   ],
                   const SizedBox(height: Gap.xxl),
                   PaperButton(
-                    label: creating ? strings.createAction : strings.unlockAction,
+                    label: creating
+                        ? strings.createAction
+                        : strings.unlockAction,
                     size: PaperButtonSize.large,
                     expand: true,
                     busy: _busy,

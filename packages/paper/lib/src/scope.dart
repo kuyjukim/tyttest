@@ -31,16 +31,14 @@ class Scope<T extends Listenable> extends InheritedNotifier<T> {
   /// Use this in callbacks (`onPressed`) and in [State.initState], where
   /// creating a dependency is either pointless or illegal.
   static T read<T extends Listenable>(BuildContext context) {
-    final element =
-        context.getElementForInheritedWidgetOfExactType<Scope<T>>();
+    final element = context.getElementForInheritedWidgetOfExactType<Scope<T>>();
     assert(element != null, 'No Scope<$T> found above this widget.');
     return (element!.widget as Scope<T>).notifier!;
   }
 
   /// Like [read], but returns null instead of asserting.
   static T? maybeRead<T extends Listenable>(BuildContext context) {
-    final element =
-        context.getElementForInheritedWidgetOfExactType<Scope<T>>();
+    final element = context.getElementForInheritedWidgetOfExactType<Scope<T>>();
     return element == null ? null : (element.widget as Scope<T>).notifier;
   }
 }

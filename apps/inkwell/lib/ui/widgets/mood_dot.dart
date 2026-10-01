@@ -73,7 +73,9 @@ class MoodPicker extends StatelessWidget {
                           : Colors.transparent,
                       borderRadius: Radii.allSm,
                       border: Border.all(
-                        color: mood == value ? colors.hairline : Colors.transparent,
+                        color: mood == value
+                            ? colors.hairline
+                            : Colors.transparent,
                       ),
                     ),
                     child: Column(

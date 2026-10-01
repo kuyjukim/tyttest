@@ -40,8 +40,7 @@ var _counter = 0;
 /// list uses the id as its sort tiebreaker, and a variable-width id would
 /// make `9` sort after `10`.
 String _newId() {
-  final stamp = DateTime.now()
-      .microsecondsSinceEpoch
+  final stamp = DateTime.now().microsecondsSinceEpoch
       .toRadixString(36)
       .padLeft(11, '0');
   final suffix = (_counter++ % 46656).toRadixString(36).padLeft(3, '0');

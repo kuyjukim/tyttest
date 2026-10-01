@@ -28,20 +28,14 @@ class VaultRepository {
     return raw != null && raw.isNotEmpty;
   }
 
-  Future<Prefs> readPrefs() async => _readJson(
-    prefsKey,
-    Prefs.fromJson,
-    () => const Prefs(),
-  );
+  Future<Prefs> readPrefs() async =>
+      _readJson(prefsKey, Prefs.fromJson, () => const Prefs());
 
   Future<void> writePrefs(Prefs prefs) =>
       _store.write(prefsKey, jsonEncode(prefs.toJson()));
 
-  Future<AttemptRecord> readAttempts() async => _readJson(
-    attemptsKey,
-    AttemptRecord.fromJson,
-    () => AttemptRecord.clean,
-  );
+  Future<AttemptRecord> readAttempts() async =>
+      _readJson(attemptsKey, AttemptRecord.fromJson, () => AttemptRecord.clean);
 
   Future<void> writeAttempts(AttemptRecord record) =>
       _store.write(attemptsKey, jsonEncode(record.toJson()));

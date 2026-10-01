@@ -41,6 +41,7 @@ class SecretKey {
   }
 
   @override
-  String toString() => 'SecretKey(${_bytes.length} bytes, '
+  String toString() =>
+      'SecretKey(${_bytes.length} bytes, '
       '${_destroyed ? 'destroyed' : 'live'})';
 }

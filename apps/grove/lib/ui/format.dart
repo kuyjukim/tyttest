@@ -19,7 +19,11 @@ abstract final class Fmt {
   ///
   /// Used for sums rather than countdowns, so it drops seconds entirely; a
   /// weekly total of "7h 32m 09s" is noise.
-  static String span(Duration duration, {String hourSuffix = 'h', String minuteSuffix = 'm'}) {
+  static String span(
+    Duration duration, {
+    String hourSuffix = 'h',
+    String minuteSuffix = 'm',
+  }) {
     final total = duration.isNegative ? Duration.zero : duration;
     final hours = total.inHours;
     final minutes = total.inMinutes % 60;
@@ -29,6 +33,9 @@ abstract final class Fmt {
   }
 
   /// Whole minutes, for the dial: `25m`, `1h 30m`.
-  static String minutes(Duration duration, {String hourSuffix = 'h', String minuteSuffix = 'm'}) =>
-      span(duration, hourSuffix: hourSuffix, minuteSuffix: minuteSuffix);
+  static String minutes(
+    Duration duration, {
+    String hourSuffix = 'h',
+    String minuteSuffix = 'm',
+  }) => span(duration, hourSuffix: hourSuffix, minuteSuffix: minuteSuffix);
 }

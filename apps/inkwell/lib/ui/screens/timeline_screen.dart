@@ -27,9 +27,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 
   Future<void> _open(String? entryId) => Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => EditorScreen(entryId: entryId),
-    ),
+    MaterialPageRoute<void>(builder: (_) => EditorScreen(entryId: entryId)),
   );
 
   @override
@@ -186,7 +184,9 @@ class _EntryList extends StatelessWidget {
           lastMonth = month;
           rows.add(
             SectionHeader(
-              title: DateFormat.yMMMM(context.localeTag).format(month.startOfDay),
+              title: DateFormat.yMMMM(
+                context.localeTag,
+              ).format(month.startOfDay),
             ),
           );
         }

@@ -438,10 +438,7 @@ class _Running extends StatelessWidget {
             ),
           ),
         ),
-        Text(
-          Fmt.clock(controller.remaining),
-          style: context.type.numericLarge,
-        ),
+        Text(Fmt.clock(controller.remaining), style: context.type.numericLarge),
         if (active.tag != null) ...[
           const SizedBox(height: Gap.xs),
           Text(active.tag!, style: context.type.label),

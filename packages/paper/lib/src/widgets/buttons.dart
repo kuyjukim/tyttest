@@ -71,7 +71,11 @@ class _PaperButtonState extends State<PaperButton> {
         Gap.md,
         context.type.label.copyWith(fontSize: 14),
       ),
-      PaperButtonSize.medium => (kMinTouchTarget, Gap.lg, context.type.bodyStrong),
+      PaperButtonSize.medium => (
+        kMinTouchTarget,
+        Gap.lg,
+        context.type.bodyStrong,
+      ),
       PaperButtonSize.large => (
         54.0,
         Gap.xxl,
@@ -194,7 +198,9 @@ class PaperIconButton extends StatelessWidget {
           child: SizedBox(
             height: kMinTouchTarget,
             width: kMinTouchTarget,
-            child: Center(child: Icon(icon, size: size, color: tint)),
+            child: Center(
+              child: Icon(icon, size: size, color: tint),
+            ),
           ),
         ),
       ),

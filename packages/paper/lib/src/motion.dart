@@ -37,7 +37,10 @@ class SoftSwap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: Motion.time(context, duration ?? const Duration(milliseconds: 220)),
+      duration: Motion.time(
+        context,
+        duration ?? const Duration(milliseconds: 220),
+      ),
       switchInCurve: Motion.curve(context, Curves.easeOutCubic),
       switchOutCurve: Motion.curve(context, Curves.easeInCubic),
       layoutBuilder: (current, previous) => Stack(

@@ -32,7 +32,8 @@ class FocusSession {
       // An unknown species name means the file was written by a newer build.
       // Falling back to the starter species keeps the garden openable instead
       // of throwing the user out of their own data.
-      species: Species.byName(json['species'] as String? ?? '') ?? Species.sprout,
+      species:
+          Species.byName(json['species'] as String? ?? '') ?? Species.sprout,
       planned: Duration(seconds: json['plannedSeconds']! as int),
       startedAt: startedAt.toLocal(),
       elapsed: Duration(seconds: json['elapsedSeconds']! as int),

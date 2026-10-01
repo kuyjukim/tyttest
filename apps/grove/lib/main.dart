@@ -18,10 +18,7 @@ Future<void> main() async {
 
   final store = GardenStore(
     repository: GardenRepository(await _openStore()),
-    controller: SessionController(
-      clock: DateTime.now,
-      idFactory: _newId,
-    ),
+    controller: SessionController(clock: DateTime.now, idFactory: _newId),
     clock: DateTime.now,
   );
 

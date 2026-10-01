@@ -141,6 +141,100 @@ void main() {
     });
   });
 
+  group('StatTile', () {
+    testWidgets(
+      'a value too wide for its slot shrinks instead of overflowing',
+      (tester) async {
+        // Three tiles share a phone's width, so each gets about a third of it,
+        // and a Korean duration at 26pt does not fit a third of a phone. This
+        // overflowed by fourteen pixels before the value was made to scale.
+        await tester.pumpWidget(
+          _host(
+            const SizedBox(
+              width: 390,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: StatTile(label: '오늘', value: '1시간 15분'),
+                  ),
+                  Expanded(
+                    child: StatTile(label: '연속', value: '12', unit: '일'),
+                  ),
+                  Expanded(
+                    child: StatTile(label: '누적', value: '167시간 40분'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        for (final text in const ['1시간 15분', '12', '167시간 40분']) {
+          expect(
+            find.text(text),
+            findsOneWidget,
+            reason: 'nothing was clipped',
+          );
+        }
+      },
+    );
+
+    testWidgets('a value that fits is not shrunk', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          const SizedBox(
+            width: 390,
+            child: Row(
+              children: [
+                Expanded(
+                  child: StatTile(label: 'Today', value: '42'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The whole tile is one third as wide in the test above; here the value
+      // has the full width, so it must still be drawn at its full 26pt.
+      final paragraph = tester.renderObject<RenderParagraph>(find.text('42'));
+      expect(paragraph.size.height, greaterThan(24));
+    });
+  });
+
+  group('StatRow', () {
+    testWidgets('keeps the tiles apart so two numbers cannot read as one', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(
+          const SizedBox(
+            width: 390,
+            child: StatRow(
+              tiles: [
+                StatTile(label: '오늘', value: '1시간 15분'),
+                StatTile(label: '연속', value: '10', unit: '일'),
+                StatTile(label: '누적', value: '29시간 10분'),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // The gap is what this widget exists for: in a bare Row of Expanded
+      // tiles these two touch, and "1시간 15분" against "10" reads as one
+      // number.
+      final first = tester.getRect(find.text('1시간 15분'));
+      final second = tester.getRect(find.text('10'));
+      expect(second.left, greaterThan(first.right));
+    });
+  });
+
   group('BarChart', () {
     List<Bar> week(List<double> values) => [
       for (final (i, v) in values.indexed)

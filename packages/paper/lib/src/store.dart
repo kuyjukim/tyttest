@@ -18,8 +18,7 @@ abstract interface class KeyValueStore {
 
 /// In-memory store for tests, previews and the web demo build.
 class MemoryStore implements KeyValueStore {
-  MemoryStore([Map<String, String>? seed])
-    : _data = <String, String>{...?seed};
+  MemoryStore([Map<String, String>? seed]) : _data = <String, String>{...?seed};
 
   final Map<String, String> _data;
 

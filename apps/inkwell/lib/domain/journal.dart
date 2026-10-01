@@ -81,8 +81,10 @@ class Journal {
     return entries.length != before;
   }
 
-  List<Entry> search(String query) =>
-      <Entry>[for (final entry in entries) if (entry.matches(query)) entry];
+  List<Entry> search(String query) => <Entry>[
+    for (final entry in entries)
+      if (entry.matches(query)) entry,
+  ];
 
   /// Entries grouped by calendar month, newest month first.
   Map<Day, List<Entry>> byMonth() {
@@ -92,7 +94,9 @@ class Journal {
       grouped.putIfAbsent(month, () => <Entry>[]).add(entry);
     }
     final months = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
-    return <Day, List<Entry>>{for (final month in months) month: grouped[month]!};
+    return <Day, List<Entry>>{
+      for (final month in months) month: grouped[month]!,
+    };
   }
 
   /// Entries written on the same month and day in an earlier year.
@@ -134,7 +138,9 @@ class Journal {
       return length;
     }
 
-    return days.contains(today) ? runEndingAt(today) : runEndingAt(today.previous);
+    return days.contains(today)
+        ? runEndingAt(today)
+        : runEndingAt(today.previous);
   }
 
   String encode() => jsonEncode(<String, Object?>{

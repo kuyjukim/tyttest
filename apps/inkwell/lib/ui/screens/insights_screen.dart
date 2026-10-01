@@ -40,28 +40,19 @@ class InsightsScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: Gap.x3l),
       children: [
         const SizedBox(height: Gap.lg),
-        Row(
-          children: [
-            Expanded(
-              child: StatTile(
-                label: strings.streakLabel,
-                value: '${journal.writingStreak(today)}',
-                unit: strings.days,
-                emphasis: true,
-              ),
+        StatRow(
+          tiles: [
+            StatTile(
+              label: strings.streakLabel,
+              value: '${journal.writingStreak(today)}',
+              unit: strings.days,
+              emphasis: true,
             ),
-            Expanded(
-              child: StatTile(
-                label: strings.entriesLabel,
-                value: '${journal.entries.length}',
-              ),
+            StatTile(
+              label: strings.entriesLabel,
+              value: '${journal.entries.length}',
             ),
-            Expanded(
-              child: StatTile(
-                label: strings.wordsLabel,
-                value: _compact(words),
-              ),
-            ),
+            StatTile(label: strings.wordsLabel, value: _compact(words)),
           ],
         ),
         SectionHeader(title: strings.writingActivity),
@@ -70,7 +61,9 @@ class InsightsScreen extends StatelessWidget {
           bars: [
             for (final day in start.through(today))
               Bar(
-                label: DateFormat.E(context.localeTag).format(day.startOfDay).substring(0, 1),
+                label: DateFormat.E(
+                  context.localeTag,
+                ).format(day.startOfDay).substring(0, 1),
                 value: (perDay[day] ?? 0).toDouble(),
                 highlight: day == today,
               ),

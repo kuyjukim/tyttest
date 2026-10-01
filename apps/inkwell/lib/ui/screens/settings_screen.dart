@@ -117,7 +117,8 @@ class SettingsScreen extends StatelessWidget {
     final changed = await showPaperSheet<bool>(
       context: context,
       title: strings.changePassphrase,
-      builder: (context) => _ChangePassphraseForm(store: store, strings: strings),
+      builder: (context) =>
+          _ChangePassphraseForm(store: store, strings: strings),
     );
     if (changed != true || !context.mounted) return;
     showPaperToast(context, strings.passphraseChanged);

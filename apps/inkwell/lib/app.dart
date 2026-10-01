@@ -119,11 +119,7 @@ class _ShellState extends State<_Shell> with WidgetsBindingObserver {
       ],
       body: IndexedStack(
         index: _tab,
-        children: const [
-          TimelineScreen(),
-          InsightsScreen(),
-          SettingsScreen(),
-        ],
+        children: const [TimelineScreen(), InsightsScreen(), SettingsScreen()],
       ),
       bottomBar: NavigationBar(
         selectedIndex: _tab,
