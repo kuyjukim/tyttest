@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Required since spring 2024. Every claim below is "nothing", and in this
+	  app that is literally true rather than a position: there is no HTTP
+	  client anywhere in the binary, so there is nowhere for data to be
+	  collected to.
+	-->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<!--
+	  Required-reason APIs. Ledger reads and writes files in its own
+	  application-support directory and never touches file timestamps, disk
+	  space, UserDefaults, system boot time or active keyboards, so this list
+	  is empty. The Flutter engine and path_provider ship their own manifests
+	  for anything they use.
+	-->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

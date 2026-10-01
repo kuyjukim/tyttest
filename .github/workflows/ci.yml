@@ -105,12 +105,17 @@ jobs:
   # compiled here or it gets compiled for the first time by whoever submits
   # it.
   #
-  # Ledger only, on purpose: it is the one app whose iOS and Android config
-  # is not the `flutter create` template, and a macOS runner bills at ten
-  # times the rate of a Linux one.
+  # Ledger and Grove: the two apps whose iOS and Android config is not the
+  # `flutter create` template. Inkwell and Stroke are still the template and
+  # have nothing here worth a macOS runner, which bills at ten times a Linux
+  # one.
   android-build:
-    name: Android build (Ledger)
+    name: Android build (${{ matrix.app }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ledger, grove]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -125,29 +130,33 @@ jobs:
       - name: Resource references resolve
         run: tool/check_android_res.py
       - name: Dependencies
-        working-directory: apps/ledger
+        working-directory: apps/${{ matrix.app }}
         run: flutter pub get
       # The signing block, locales_config.xml and the adaptive icon are all
       # compiled for the first time here. Without android/key.properties the
       # Gradle script falls back to the debug key and says so, which is the
       # path a contributor takes and therefore the one worth testing.
       - name: Build app bundle
-        working-directory: apps/ledger
+        working-directory: apps/${{ matrix.app }}
         run: flutter build appbundle --release
       - name: Build APK
-        working-directory: apps/ledger
+        working-directory: apps/${{ matrix.app }}
         run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
-          name: ledger-android
+          name: ${{ matrix.app }}-android
           path: |
-            apps/ledger/build/app/outputs/bundle/release/*.aab
-            apps/ledger/build/app/outputs/flutter-apk/*.apk
+            apps/${{ matrix.app }}/build/app/outputs/bundle/release/*.aab
+            apps/${{ matrix.app }}/build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
 
   ios-build:
-    name: iOS build (Ledger)
+    name: iOS build (${{ matrix.app }})
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ledger, grove]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -156,21 +165,21 @@ jobs:
           channel: stable
           cache: true
       - name: Dependencies
-        working-directory: apps/ledger
+        working-directory: apps/${{ matrix.app }}
         run: flutter pub get
       # --no-codesign, because signing needs a team and a provisioning
       # profile that do not belong in a repository. Everything short of
       # signing still compiles: the Xcode project, Info.plist, the asset
       # catalogue and the pod install.
       - name: Build
-        working-directory: apps/ledger
+        working-directory: apps/${{ matrix.app }}
         run: flutter build ios --release --no-codesign
       # PrivacyInfo.xcprivacy and the InfoPlist.strings files exist on disk
       # but are not referenced by project.pbxproj, so they are not copied
       # into the bundle. Apple rejects an upload without the privacy
       # manifest, and the rejection arrives after the binary does.
       - name: Privacy manifest and localisations are in the bundle
-        working-directory: apps/ledger
+        working-directory: apps/${{ matrix.app }}
         run: |
           app=$(find build/ios/iphoneos -maxdepth 1 -name '*.app' | head -1)
           echo "bundle: $app"

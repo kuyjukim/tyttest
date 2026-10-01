@@ -1,0 +1,4 @@
+/* Home-screen name. The App Store listing name is set separately in
+   App Store Connect. */
+"CFBundleDisplayName" = "Grove";
+"CFBundleName" = "Grove";

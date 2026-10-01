@@ -134,8 +134,31 @@ class Canvas:
             colour,
         )
 
+    def arc(self, cx: float, cy: float, radius: float, start: float,
+            end: float, width: float,
+            colour: tuple[int, int, int] | None) -> None:
+        """A rounded arc, with angles in radians clockwise from straight up.
+
+        Stepped discs rather than a stroked path: there is no path machinery
+        here, and at 4x supersample the seam between two discs a third of a
+        pixel apart is finer than the downsample can see. Stepping by a third
+        of the stroke width would still band on the outer edge, so the step is
+        taken in arc length.
+        """
+        if radius <= 0 or width <= 0:
+            return
+        step = max(1, int(abs(end - start) * radius / 1.5))
+        for i in range(step + 1):
+            angle = start + (end - start) * i / step
+            self.disc(
+                cx + math.sin(angle) * radius,
+                cy - math.cos(angle) * radius,
+                width / 2,
+                colour,
+            )
+
     def disc(self, cx: float, cy: float, r: float,
-             colour: tuple[int, int, int]) -> None:
+             colour: tuple[int, int, int] | None) -> None:
         for y in range(int(cy - r), int(cy + r) + 1):
             dy = (y + 0.5) - cy
             if abs(dy) > r:
@@ -236,17 +259,18 @@ def _draw_mark(canvas: Canvas, scale: float, *,
             )
 
 
-def _adaptive_scale() -> float:
-    """How far the mark shrinks to clear an adaptive icon's mask.
+def _adaptive_scale(extent: float) -> float:
+    """How far a mark shrinks to clear an adaptive icon's mask.
 
-    The safe zone is a circle, so the card's diagonal is what has to fit
-    inside it - not its width, which would leave the corners to be shaved
-    off by a round mask.
+    The safe zone is a circle, so what has to fit inside it is the diameter
+    of the mark's bounding circle - for a rectangle that is its diagonal, not
+    its width, which would leave the corners to be shaved off by a round mask.
     """
-    width = CARD[2] - CARD[0]
-    height = CARD[3] - CARD[1]
-    diagonal = math.hypot(width, height)
-    return SAFE_ZONE * SIZE / diagonal
+    return SAFE_ZONE * SIZE / extent
+
+
+# The diagonal of Ledger's card, and the diameter of Grove's dial.
+LEDGER_EXTENT = math.hypot(CARD[2] - CARD[0], CARD[3] - CARD[1])
 
 
 def ledger_icon() -> Canvas:
@@ -278,7 +302,7 @@ def ledger_foreground() -> Canvas:
     edges cut off on exactly the devices the layer exists for.
     """
     canvas = Canvas(W, H, alpha=True)
-    _draw_mark(canvas, _adaptive_scale(), card=CREAM, track=FAINT, fill=INK)
+    _draw_mark(canvas, _adaptive_scale(LEDGER_EXTENT), card=CREAM, track=FAINT, fill=INK)
     return canvas
 
 
@@ -294,32 +318,192 @@ def ledger_monochrome() -> Canvas:
     canvas = Canvas(W, H, alpha=True)
     _draw_mark(
         canvas,
-        _adaptive_scale(),
+        _adaptive_scale(LEDGER_EXTENT),
         card=(0, 0, 0),
         erase=frozenset({'fill'}),
     )
     return canvas
 
 
-LAYERS = {
-    'master': ledger_icon,
-    'foreground': ledger_foreground,
-    'monochrome': ledger_monochrome,
+# ---------------------------------------------------------------- Grove
+
+# Deep pine, because the whole screen is a forest floor and because it has to
+# be nothing like Ledger's terracotta on the same home screen.
+PINE_TOP = (0x2F, 0x6B, 0x4A)
+PINE_BOTTOM = (0x1B, 0x43, 0x30)
+
+BARK = (0xF3, 0xF7, 0xEA)        # the tree, drawn light so it reads on pine
+DIAL_TRACK = (0x44, 0x89, 0x63)  # the unfilled arc: pine, one step lighter
+DIAL_FILL = (0xA8, 0xD9, 0x8A)   # leaf green, the app's own accent
+
+# The dial, in the master's 1024-unit space. The app draws a 270° arc with the
+# gap at the bottom, and the icon draws the same one: a session in progress is
+# what the app looks like, so it is what the icon should be.
+DIAL_RADIUS = 332
+DIAL_STROKE = 58
+DIAL_SWEEP = math.pi * 1.5
+DIAL_START = -DIAL_SWEEP / 2
+DIAL_FRACTION = 0.68
+
+GROVE_EXTENT = (DIAL_RADIUS + DIAL_STROKE / 2) * 2
+
+# The tree. Three levels of branching, which is what the app's own painter
+# does; a lollipop canopy would read as any tree app, and this reads as this
+# one.
+# The tree sits inside the ring with air around it, so the two read as one
+# composition rather than as a collision. The spread is kept near the app's
+# own species parameters (0.34-0.52 rad); wider than that and the outer tips
+# cross the arc. The taper is deliberately gentle - at a 60-pixel home screen
+# icon, three levels of 0.64 taper puts the last twigs under a pixel wide.
+TRUNK_BASE = 722          # where the trunk meets the gap in the dial
+TRUNK_LENGTH = 190
+TRUNK_WIDTH = 46
+BRANCH_SPREAD = 0.44      # radians off the parent, each way
+BRANCH_SHORTEN = 0.70
+BRANCH_THIN = 0.74
+BRANCH_DEPTH = 3
+
+# Drawn bare, which was a decision rather than an omission. Discs at the tips
+# were tried as foliage and read as pins on a board - eight dots on eight
+# twigs is a ball-and-stick diagram, and enlarging them until they merge into
+# a canopy buries the branching that makes this mark not every other focus
+# app's tree. Bare, upright, symmetrical and cream inside a growing green dial
+# does not read as the withered tree; that one is grey and drooping.
+
+
+def _draw_grove(canvas: Canvas, scale: float, *,
+                track: tuple[int, int, int] | None = None,
+                fill: tuple[int, int, int] | None = None,
+                tree: tuple[int, int, int] | None = None,
+                erase: frozenset[str] = frozenset()) -> None:
+    """Draws the dial and the tree, scaled about the centre of the canvas."""
+    unit = canvas.w / SIZE
+    centre = SIZE / 2
+
+    def at(v: float) -> float:
+        return (centre + (v - centre) * scale) * unit
+
+    def length(v: float) -> float:
+        return v * scale * unit
+
+    if track is not None or 'track' in erase:
+        canvas.arc(
+            at(centre), at(centre), length(DIAL_RADIUS),
+            DIAL_START, DIAL_START + DIAL_SWEEP, length(DIAL_STROKE),
+            None if 'track' in erase else track,
+        )
+    if fill is not None or 'fill' in erase:
+        canvas.arc(
+            at(centre), at(centre), length(DIAL_RADIUS),
+            DIAL_START, DIAL_START + DIAL_SWEEP * DIAL_FRACTION,
+            length(DIAL_STROKE),
+            None if 'fill' in erase else fill,
+        )
+
+    if tree is None and 'tree' not in erase:
+        return
+    colour = None if 'tree' in erase else tree
+
+    def branch(x: float, y: float, angle: float, long: float,
+               wide: float, depth: int) -> None:
+        tip = (x + math.sin(angle) * long, y - math.cos(angle) * long)
+        canvas.thick_line((x, y), tip, wide, colour)
+        # A disc at each joint, or the corner between two branches is a notch.
+        canvas.disc(tip[0], tip[1], wide / 2, colour)
+        if depth == 0:
+            return
+        for side in (-BRANCH_SPREAD, BRANCH_SPREAD):
+            branch(tip[0], tip[1], angle + side, long * BRANCH_SHORTEN,
+                   wide * BRANCH_THIN, depth - 1)
+
+    branch(
+        at(centre), at(TRUNK_BASE), 0.0,
+        length(TRUNK_LENGTH), length(TRUNK_WIDTH), BRANCH_DEPTH,
+    )
+
+
+def grove_icon() -> Canvas:
+    """A tree growing inside the focus dial.
+
+    The running screen of the app is literally this: a 270° dial with the
+    session's tree in the middle of it. An icon of a tree alone would be every
+    other focus app, and one of a timer alone would be a clock - the pair is
+    what makes it this app, and it is also the first screenshot.
+    """
+    canvas = Canvas(W, H)
+    canvas.vertical_gradient(PINE_TOP, PINE_BOTTOM)
+    _draw_grove(canvas, 1.0, track=DIAL_TRACK, fill=DIAL_FILL, tree=BARK)
+    return canvas
+
+
+def grove_foreground() -> Canvas:
+    canvas = Canvas(W, H, alpha=True)
+    _draw_grove(canvas, _adaptive_scale(GROVE_EXTENT),
+                track=DIAL_TRACK, fill=DIAL_FILL, tree=BARK)
+    return canvas
+
+
+def grove_monochrome() -> Canvas:
+    """The silhouette Android 13 tints.
+
+    Only the tree. The dial is a ring of even weight, and tinted flat it
+    becomes a plain circle around a shape - which is what a hundred other
+    monochrome icons already are. The branching alone is the distinctive part.
+    """
+    canvas = Canvas(W, H, alpha=True)
+    _draw_grove(canvas, _adaptive_scale(GROVE_EXTENT), tree=(0, 0, 0))
+    return canvas
+
+
+# Each app's three layers, plus the two colours its Android background
+# gradient is filled with. make_app_icons.sh reads the colours from here
+# rather than carrying its own copy of them.
+APPS = {
+    'ledger': {
+        'master': ledger_icon,
+        'foreground': ledger_foreground,
+        'monochrome': ledger_monochrome,
+        'background': (TERRACOTTA_TOP, TERRACOTTA_BOTTOM),
+    },
+    'grove': {
+        'master': grove_icon,
+        'foreground': grove_foreground,
+        'monochrome': grove_monochrome,
+        'background': (PINE_TOP, PINE_BOTTOM),
+    },
 }
+
+LAYERS = ('master', 'foreground', 'monochrome')
 
 
 def main(argv: list[str]) -> int:
+    # `--background <app>` prints the two gradient colours for the Android
+    # background drawable, so that the shell script does not keep a second
+    # copy of them to drift out of step with these.
+    if len(argv) > 2 and argv[1] == '--background':
+        app = APPS.get(argv[2])
+        if app is None:
+            print(f'unknown app {argv[2]!r}', file=sys.stderr)
+            return 2
+        print(' '.join('#%02X%02X%02X' % c for c in app['background']))
+        return 0
+
     out = argv[1] if len(argv) > 1 else 'icon-master.png'
     layer = argv[2] if len(argv) > 2 else 'master'
+    name = argv[3] if len(argv) > 3 else 'ledger'
+
     if layer not in LAYERS:
-        print(
-            f'unknown layer {layer!r}; expected one of '
-            + ', '.join(sorted(LAYERS)),
-            file=sys.stderr,
-        )
+        print(f'unknown layer {layer!r}; expected one of '
+              + ', '.join(LAYERS), file=sys.stderr)
         return 2
-    LAYERS[layer]().write_png(out)
-    print(f'wrote {out} at {W}x{H} ({layer})')
+    app = APPS.get(name)
+    if app is None:
+        print(f'no icon is drawn for {name!r}; known: '
+              + ', '.join(sorted(APPS)), file=sys.stderr)
+        return 2
+
+    app[layer]().write_png(out)
+    print(f'wrote {out} at {W}x{H} ({name} {layer})')
     return 0
 
 
