@@ -21,6 +21,11 @@ no device.
 - **Localised launcher name**, English and Korean, for both platforms.
 - **Screenshots.** `flutter test tool/screenshots.dart --update-goldens`
   writes the 6.9" set to `store/screenshots/`.
+- **Listing copy**, English and Korean, in `store/listing-*.md`, with the
+  rest of the App Store Connect form in `store/metadata.md`. Check the field
+  limits with `tool/check_listing.py apps/ledger/store` from the repo root -
+  App Store Connect silently truncates an over-long field, or rejects the
+  upload after the binary has already gone up.
 
 ## Needs a Mac, and is not verified here
 
